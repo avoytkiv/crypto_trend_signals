@@ -56,7 +56,7 @@ while True:
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
-                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru.encode('utf-8'))
                 else:
                     send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                 send_post_to_telegram('Photo', dic['channel_id'],
@@ -70,7 +70,7 @@ while True:
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
-                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru.encode('utf-8'))
                 else:
                     send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                 send_post_to_telegram('Photo', dic['channel_id'],
