@@ -39,8 +39,9 @@ while True:
             price_change = 0
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
         if price_change >= 5:
-            send_post_to_telegram('Message', '-1001482165395', 'Цена {} изменилась больше чем на 5% в Вашу пользу.\n'
-                                                               'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin))
+            msg_ru = u'Цена {} изменилась больше чем на 5% в Вашу пользу.\n' \
+                     'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin)
+            send_post_to_telegram('Message', '-1001482165395', msg_ru)
             send_post_to_telegram('Photo', '-1001482165395',
                                   visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
             logger.info('Message about reaching target was sent to Криптоисслдеование 2.0')
@@ -50,13 +51,13 @@ while True:
             # Messages
             msg_eng = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
                 row['signal_order'], coin, row['close'])
-            msg_ru = '{} {} по {}\nВ эту позицию мы вложили только небольшую часть нашего капитала.\n' \
+            msg_ru = u'{} {} по {}\nВ эту позицию мы вложили только небольшую часть нашего капитала.\n' \
                      'Пожалуйста, контролируйте свой риск!'.format(
                 'Купить' if row['signal_order'] == 'Long' else 'Продать', coin, row['close'])
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
-                    send_post_to_telegram('Message', dic['channel_id'], msg_ru.encode('utf-8'))
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                 else:
                     send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                 send_post_to_telegram('Photo', dic['channel_id'],
@@ -66,11 +67,11 @@ while True:
             logger.info('Close signal in {}'.format(coin))
             # Messages
             msg_eng = '{} {} at {}\nLets move on to next Good trade!'.format(row['signal_order'], coin, row['close'])
-            msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
+            msg_ru = u'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
-                    send_post_to_telegram('Message', dic['channel_id'], msg_ru.encode('utf-8'))
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                 else:
                     send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                 send_post_to_telegram('Photo', dic['channel_id'],
