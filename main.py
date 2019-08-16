@@ -11,10 +11,10 @@ logger = logging.getLogger('main')
 period = '15'
 coins = ['XETHXXBT', 'XETHZUSD', 'XLTCZUSD', 'XLTCXXBT', 'XREPXXBT', 'XXBTZUSD', 'XXRPXXBT', 'BCHXBT']
 
-d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571'},
-     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063'},
-     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto'},
-     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395'}]
+d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
+     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
+     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
+     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
 
 
 while True:
@@ -39,27 +39,41 @@ while True:
             price_change = 0
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
         if price_change >= 5:
-            send_post_to_telegram('Message', '-1001482165395', 'Price of {} changed more than 5% in your favor.\n'
-                                                               'Please, reenter if position was closed automatically.'.format(coin))
+            send_post_to_telegram('Message', '-1001482165395', 'Цена {} изменилась больше чем на 5% в Вашу пользу.\n'
+                                                               'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin))
             send_post_to_telegram('Photo', '-1001482165395',
                                   visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
             logger.info('Message about reaching target was sent to Криптоисслдеование 2.0')
 
         if row['signal_order'] == 'Long' or row['signal_order'] == 'Sell':
             logger.info('{} signal in {}'.format(row['signal_order'], coin))
-            msg = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
+            # Messages
+            msg_eng = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
                 row['signal_order'], coin, row['close'])
+            msg_ru = '{} {} по {}\nВ эту позицию мы вложили только небольшую часть нашего капитала.\n' \
+                     'Пожалуйста, контролируйте свой риск!'.format(row['signal_order'], coin, row['close'])
+            # Send messages to channels
             for dic in d:
-                send_post_to_telegram('Message', dic['channel_id'], msg)
+                if dic['lang'] == 'ru':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                else:
+                    send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                 send_post_to_telegram('Photo', dic['channel_id'],
                                       visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
                 logger.info('Message posted in {}'.format(dic['channel_name']))
         elif row['signal_order'] == 'Close':
             logger.info('Close signal in {}'.format(coin))
-            msg = '{} {} at {}\nLets move on to next Good trade!'.format(
+            # Messages
+            msg_eng = '{} {} at {}\nLets move on to next Good trade!'.format(
                 row['signal_order'], coin, row['close'])
+            msg_ru = '{} {} по {}\nПереходим к следующему хорошему трейду!'.format(
+                row['signal_order'], coin, row['close'])
+            # Send messages to channels
             for dic in d:
-                send_post_to_telegram('Message', dic['channel_id'], msg)
+                if dic['lang'] == 'ru':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                else:
+                    send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                 send_post_to_telegram('Photo', dic['channel_id'],
                                       visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
                 logger.info('Message posted in {}'.format(dic['channel_name']))
