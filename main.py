@@ -13,8 +13,8 @@ coins = ['XETHXXBT', 'XETHZUSD', 'XLTCZUSD', 'XLTCXXBT', 'XREPXXBT', 'XXBTZUSD',
 
 d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571'},
      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063'},
-     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395'},
      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto'}]
+#{'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395'}
 
 
 while True:
