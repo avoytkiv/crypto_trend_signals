@@ -28,7 +28,7 @@ import requests
 # g.map_upper(corrdot)
 
 
-def send_post_to_telegram(type, message):
+def send_post_to_telegram(type, channel_id, message):
     """
     :param
     type: str, Message or Photo
@@ -39,7 +39,6 @@ def send_post_to_telegram(type, message):
     # telegram url
     url = 'https://api.telegram.org/bot'
     token = '744251948:AAFOjpwvLA8tEGlh5j99Tc8HW4ad-qmQ0qI'
-    channel_id = '@libertex_crypto'
 
     common_url = url + token + '/send{}'.format(type) + '?chat_id=' + channel_id
     if type == 'Message':
