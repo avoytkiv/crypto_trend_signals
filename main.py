@@ -51,7 +51,8 @@ while True:
             msg_eng = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
                 row['signal_order'], coin, row['close'])
             msg_ru = '{} {} по {}\nВ эту позицию мы вложили только небольшую часть нашего капитала.\n' \
-                     'Пожалуйста, контролируйте свой риск!'.format(row['signal_order'], coin, row['close'])
+                     'Пожалуйста, контролируйте свой риск!'.format(
+                'Купить' if row['signal_order'] == 'Long' else 'Продать', coin, row['close'])
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
@@ -64,10 +65,8 @@ while True:
         elif row['signal_order'] == 'Close':
             logger.info('Close signal in {}'.format(coin))
             # Messages
-            msg_eng = '{} {} at {}\nLets move on to next Good trade!'.format(
-                row['signal_order'], coin, row['close'])
-            msg_ru = '{} {} по {}\nПереходим к следующему хорошему трейду!'.format(
-                row['signal_order'], coin, row['close'])
+            msg_eng = '{} {} at {}\nLets move on to next Good trade!'.format(row['signal_order'], coin, row['close'])
+            msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
