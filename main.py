@@ -13,8 +13,8 @@ coins = ['XETHXXBT', 'XETHZUSD', 'XLTCZUSD', 'XLTCXXBT', 'XREPXXBT', 'XXBTZUSD',
 
 d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571'},
      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063'},
-     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto'}]
-#{'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395'}
+     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto'},
+     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395'}]
 
 
 while True:
@@ -23,6 +23,26 @@ while True:
         df_data = get_history_kraken(coin, period)
         df = calc_strategy(df_data)
         row = df.iloc[-1]
+        # Filter signals
+        df_signals = df[(df['signal_order'] == 'Long') |
+                        (df['signal_order'] == 'Sell') |
+                        (df['signal_order'] == 'Close')]
+        if df_signals.empty:
+            logger.info('No history signals in {}'.format(coin))
+
+        last_signal = df_signals['signal_order'].iloc[-1]
+        if last_signal == 'Long':
+            price_change = (row['close'] - df_signals['close'].iloc[-1]) * 100 / df_signals['close'].iloc[-1]
+        elif last_signal == 'Sell':
+            price_change = (df_signals['close'].iloc[-1] - row['close']) * 100 / df_signals['close'].iloc[-1]
+        else:
+            price_change = 0
+        # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
+        if price_change >= 5:
+            send_post_to_telegram('Message', '-1001482165395', 'Price changed more than 5% in your favor.\n'
+                                                               'Please, reenter.')
+
+           
         if row['signal_order'] == 'Long' or row['signal_order'] == 'Sell':
             logger.info('{} signal in {}'.format(row['signal_order'], coin))
             msg = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
