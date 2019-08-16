@@ -39,10 +39,12 @@ while True:
             price_change = 0
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
         if price_change >= 5:
-            send_post_to_telegram('Message', '-1001482165395', 'Price changed more than 5% in your favor.\n'
-                                                               'Please, reenter.')
+            send_post_to_telegram('Message', '-1001482165395', 'Price of {} changed more than 5% in your favor.\n'
+                                                               'Please, reenter.'.format(coin))
+            send_post_to_telegram('Photo', '-1001482165395',
+                                  visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
+            logger.info('Message about reaching target was sent to Криптоисслдеование 2.0')
 
-           
         if row['signal_order'] == 'Long' or row['signal_order'] == 'Sell':
             logger.info('{} signal in {}'.format(row['signal_order'], coin))
             msg = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
