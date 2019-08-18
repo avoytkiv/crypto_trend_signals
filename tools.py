@@ -4,6 +4,7 @@ import matplotlib.dates as mdates
 import datetime
 import plotly.graph_objs as go
 import requests
+from urllib.parse import urlencode
 
 
 # def corrdot(*args, **kwargs):
@@ -39,14 +40,18 @@ def send_post_to_telegram(type, channel_id, message):
     # telegram url
     url = 'https://api.telegram.org/bot'
     token = '744251948:AAFOjpwvLA8tEGlh5j99Tc8HW4ad-qmQ0qI'
-
-    common_url = url + token + '/send{}'.format(type) + '?chat_id=' + channel_id
+    query = {
+        'chat_id': channel_id
+    }
+    get_final_url = lambda: '{}{}/send{}?{}'.format(url, token, type, urlencode(query))
     if type == 'Message':
-        final_url = common_url + '&text=' + message
-        return requests.post(final_url, message)
-    else:
-        files = {'photo': open(message, 'rb')}
-        return requests.post(common_url, files=files)
+        query['text'] = message
+        return requests.post(get_final_url())
+
+    if type == 'Photo':
+        return requests.post(get_final_url(), files={'photo': open(message, 'rb')})
+
+    raise RuntimeError('unknown message type: {}'.format(type))
 
 
 def visualize_candlestick(df, symbol, period, time):

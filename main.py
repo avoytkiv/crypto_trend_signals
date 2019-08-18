@@ -39,7 +39,7 @@ while True:
             price_change = 0
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
         if price_change >= 5:
-            msg_ru = u'Цена {} изменилась больше чем на 5% в Вашу пользу.\n' \
+            msg_ru = 'Цена {} изменилась больше чем на 5% в Вашу пользу.\n' \
                      'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin)
             send_post_to_telegram('Message', '-1001482165395', msg_ru)
             send_post_to_telegram('Photo', '-1001482165395',
