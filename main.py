@@ -3,6 +3,7 @@ from get_kraken import get_history_kraken
 from tools import send_post_to_telegram, visualize_candlestick
 import time
 import logging
+from collections import defaultdict
 
 
 logging.basicConfig(format='%(asctime)-15s [%(levelname)s]: %(message)s', level=logging.INFO)
@@ -16,7 +17,7 @@ d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571',
      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
 
-
+sent_messages = defaultdict(list)
 while True:
     logging.info('Retrieve prices for {} assets'.format(len(coins)))
     for coin in coins:
@@ -38,8 +39,9 @@ while True:
         else:
             price_change = 0
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
-        if price_change >= 5:
-            msg_ru = 'Цена {} изменилась больше чем на 5% в Вашу пользу.\n' \
+        if price_change >= 5 and df_signals.date.iloc[-1] not in sent_messages[coin]:
+            sent_messages[coin].append(df_signals.date.iloc[-1])
+            msg_ru = 'Цена {} изменилась более чем на 5% в Вашу пользу.\n' \
                      'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin)
             send_post_to_telegram('Message', '-1001482165395', msg_ru)
             send_post_to_telegram('Photo', '-1001482165395',
