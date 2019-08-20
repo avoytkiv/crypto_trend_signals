@@ -78,9 +78,12 @@ def visualize_candlestick(df, symbol, period, time):
     sell_signals = df[df['signal_order'] == 'Sell']
     close_signals = df[df['signal_order'] == 'Close']
     # Plot signals
-    plt.scatter(buy_signals['date2num'].values, buy_signals['close'].values, marker='^', label='Buy', s=50, alpha=1)
-    plt.scatter(sell_signals['date2num'].values, sell_signals['close'].values, marker='v', label='Sell', s=50, alpha=1)
-    plt.scatter(close_signals['date2num'].values, close_signals['close'].values, marker='X', label='Close', s=50, alpha=1)
+    plt.scatter(buy_signals['date2num'].values, buy_signals['close'].values, marker='^', c='green',
+                label='Long', s=70, alpha=1)
+    plt.scatter(sell_signals['date2num'].values, sell_signals['close'].values, marker='v', c='red',
+                label='Short', s=70, alpha=1)
+    plt.scatter(close_signals['date2num'].values, close_signals['close'].values, marker='X', c='blue',
+                label='Close', s=70, alpha=1)
     # Axis
     ax1.xaxis_date()
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))

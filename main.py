@@ -12,11 +12,10 @@ logger = logging.getLogger('main')
 period = 15
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT', 'LTCBTC', 'EOSETH', 'ETHBTC', 'XMRBTC']
 
-# d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
-#      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
-#      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
-#      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
-d = {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'}
+d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
+     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
+     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
+     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
 
 
 sent_messages = defaultdict(list)
@@ -28,7 +27,7 @@ while True:
         row = df.iloc[-1]
         # Filter signals
         df_signals = df[(df['signal_order'] == 'Long') |
-                        (df['signal_order'] == 'Sell') |
+                        (df['signal_order'] == 'Short') |
                         (df['signal_order'] == 'Close')]
         if df_signals.empty:
             logger.info('No history signals in {}'.format(coin))
@@ -36,7 +35,7 @@ while True:
         last_signal = df_signals['signal_order'].iloc[-1]
         if last_signal == 'Long':
             price_change = (row['close'] - df_signals['close'].iloc[-1]) * 100 / df_signals['close'].iloc[-1]
-        elif last_signal == 'Sell':
+        elif last_signal == 'Short':
             price_change = (df_signals['close'].iloc[-1] - row['close']) * 100 / df_signals['close'].iloc[-1]
         else:
             price_change = 0
@@ -50,7 +49,7 @@ while True:
                                   visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
             logger.info('Message about reaching target was sent to Криптоисслдеование 2.0')
 
-        if row['signal_order'] == 'Long' or row['signal_order'] == 'Sell':
+        if row['signal_order'] == 'Long' or row['signal_order'] == 'Short':
             logger.info('{} signal in {}'.format(row['signal_order'], coin))
             # Messages
             msg_eng = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(

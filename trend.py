@@ -280,9 +280,9 @@ def calc_strategy(df_data):
             tools.cross_under(df['close'], df['support_00']) | tools.cross_under(df['close'], df['support_01']))
 
     df.loc[df['long_condition'] & (df['ind1'] >= thresh), 'signal'] = 'Long'
-    df.loc[df['short_condition'] & (df['ind1'] <= -thresh), 'signal'] = 'Sell'
+    df.loc[df['short_condition'] & (df['ind1'] <= -thresh), 'signal'] = 'Short'
     df['signal_ffill'] = df['signal'].fillna(method='ffill').fillna('')
-    df.loc[df['long_condition'] & (df['ind1'].abs() < thresh) & (df['signal_ffill'] == 'Sell'), 'signal'] = 'Close'
+    df.loc[df['long_condition'] & (df['ind1'].abs() < thresh) & (df['signal_ffill'] == 'Short'), 'signal'] = 'Close'
     df.loc[df['short_condition'] & (df['ind1'].abs() < thresh) & (df['signal_ffill'] == 'Long'), 'signal'] = 'Close'
     df['signal_ffill'] = df['signal'].fillna(method='ffill')
     df['signal_ffill_shift'] = df['signal_ffill'].shift(1)
