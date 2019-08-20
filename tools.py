@@ -62,24 +62,24 @@ def visualize_candlestick(df, symbol, period, time):
     :param time:
     :return:
     """
-    # if df.shape[0] > 300:
-    #     df = df.tail(300)
+    if df.shape[0] > 300:
+        df = df.tail(300)
     f = lambda x: mdates.date2num(datetime.datetime.fromtimestamp(x))
-    df['date2num'] = df['date'].apply(f)
+    df['date2num'] = df['timestamp'].apply(f)
     ohlc = df[['date2num', 'open', 'high', 'low', 'close']].values
     # Making plot area
     fig = plt.figure()
     ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=6, colspan=1)
     # Making candlestick plot
-    width = .6 / (24 * 60) * int(period)
-    candlestick_ohlc(ax1, ohlc, width=width, colorup='g', colordown='r', alpha=0.75)
+    width = .6 / (24 * 60) * period
+    candlestick_ohlc(ax1, ohlc, width=width, colorup='grey', colordown='black', alpha=0.75)
     # Making signals overlay
     buy_signals = df[df['signal_order'] == 'Long']
     sell_signals = df[df['signal_order'] == 'Sell']
     close_signals = df[df['signal_order'] == 'Close']
     # Plot signals
     plt.scatter(buy_signals['date2num'].values, buy_signals['close'].values, marker='^', label='Buy', s=50, alpha=1)
-    plt.scatter(sell_signals['date2num'].values, sell_signals['close'].values, marker='o', label='Sell', s=50, alpha=1)
+    plt.scatter(sell_signals['date2num'].values, sell_signals['close'].values, marker='v', label='Sell', s=50, alpha=1)
     plt.scatter(close_signals['date2num'].values, close_signals['close'].values, marker='X', label='Close', s=50, alpha=1)
     # Axis
     ax1.xaxis_date()
@@ -93,7 +93,7 @@ def visualize_candlestick(df, symbol, period, time):
     plt.title('{} {} chart'.format(symbol, period))
     plt.legend()
     # Save figure
-    figure_name = '{}-{}min-{}.png'.format(symbol, period, time)
+    figure_name = '{}-{}-{}.png'.format(symbol, period, time)
     plt.savefig(figure_name)
 
     return figure_name

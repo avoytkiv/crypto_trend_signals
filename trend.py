@@ -30,7 +30,7 @@ class Increment:
 
 
 def calc_strategy(df_data):
-    df_data['timeindex'] = pd.to_datetime(df_data['date'], unit='s')
+    df_data['timeindex'] = pd.to_datetime(df_data['timestamp'], unit='s')
     df_data.set_index('timeindex', inplace=True)
 
     curr_day_df = df_data.resample('1D').agg({
@@ -63,7 +63,7 @@ def calc_strategy(df_data):
         prev_d_close = sample['d_close'].iloc[-1]
 
         df = df.append(sample)
-        df = df.drop_duplicates(subset='date', keep='last')
+        df = df.drop_duplicates(subset='timestamp', keep='last')
 
     def daily_candle_compare(prev_high, prev_low, prev_close, curr_high, curr_low, curr_open, curr_close):
         InsideDown = curr_high <= prev_high and curr_low >= prev_low and curr_close <= curr_open
