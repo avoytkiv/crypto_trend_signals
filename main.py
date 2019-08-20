@@ -1,5 +1,5 @@
 from trend import calc_strategy
-from get_kraken import get_history_kraken
+from get_binance import get_all_binance
 from tools import send_post_to_telegram, visualize_candlestick
 import time
 import logging
@@ -9,19 +9,21 @@ from collections import defaultdict
 logging.basicConfig(format='%(asctime)-15s [%(levelname)s]: %(message)s', level=logging.INFO)
 logger = logging.getLogger('main')
 
-period = '15'
-coins = ['XETHXXBT', 'XETHZUSD', 'XLTCZUSD', 'XLTCXXBT', 'XREPXXBT', 'XXBTZUSD', 'XXRPXXBT', 'BCHXBT']
+period = 15
+coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT', 'LTCBTC', 'EOSETH', 'ETHBTC', 'XMRBTC']
 
-d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
-     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
-     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
-     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
+# d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
+#      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
+#      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
+#      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
+d = {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'}
+
 
 sent_messages = defaultdict(list)
 while True:
     logging.info('Retrieve prices for {} assets'.format(len(coins)))
     for coin in coins:
-        df_data = get_history_kraken(coin, period)
+        df_data = get_all_binance(coin, '{}m'.format(period))
         df = calc_strategy(df_data)
         row = df.iloc[-1]
         # Filter signals
@@ -83,4 +85,4 @@ while True:
             logger.info('No signal in {}'.format(coin))
 
     logger.info('Sleep...')
-    time.sleep(60 * int(period))
+    time.sleep(60 * period)
