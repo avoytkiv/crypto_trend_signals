@@ -75,7 +75,7 @@ def visualize_candlestick(df, symbol, period, time):
     candlestick_ohlc(ax1, ohlc, width=width, colorup='grey', colordown='black', alpha=0.75)
     # Making signals overlay
     buy_signals = df[df['signal_order'] == 'Long']
-    sell_signals = df[df['signal_order'] == 'Sell']
+    sell_signals = df[df['signal_order'] == 'Short']
     close_signals = df[df['signal_order'] == 'Close']
     # Plot signals
     plt.scatter(buy_signals['date2num'].values, buy_signals['close'].values, marker='^', c='green',

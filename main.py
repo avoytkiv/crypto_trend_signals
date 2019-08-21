@@ -43,8 +43,8 @@ while True:
         if last_signal != 'Close':
             open_position_price_chg = last_price - open_price if last_signal == 'Long' else open_price - last_price
             open_position_price_pct_chg = open_position_price_chg * 100 / open_price
-            logger.info('Result for {} {} opened from {}: {}\n'.format(coin, last_signal, df_signals.index[-1],
-                                                                       open_position_price_pct_chg))
+            logger.info('Result for {} {} opened from {}: {}'.format(coin, last_signal, df_signals.index[-1],
+                                                                       round(open_position_price_pct_chg, 2)))
         else:
             open_position_price_pct_chg = 0
 
