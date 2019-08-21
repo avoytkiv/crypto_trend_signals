@@ -98,6 +98,8 @@ def visualize_candlestick(df, symbol, period, time):
     # Save figure
     figure_name = '{}-{}-{}.png'.format(symbol, period, time)
     plt.savefig(figure_name)
+    # close it so it never gets displayed
+    plt.close(fig)
 
     return figure_name
 
