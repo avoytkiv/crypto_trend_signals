@@ -49,8 +49,8 @@ while True:
             open_position_price_pct_chg = 0
 
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
-        if open_position_price_pct_chg >= 5 and df_signals.date.iloc[-1] not in sent_messages[coin]:
-            sent_messages[coin].append(df_signals.date.iloc[-1])
+        if open_position_price_pct_chg >= 5 and df_signals.index[-1] not in sent_messages[coin]:
+            sent_messages[coin].append(df_signals.index[-1])
             msg_ru = 'Цена {} изменилась более чем на 5% в Вашу пользу.\n' \
                      'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin)
             send_post_to_telegram('Message', '-1001482165395', msg_ru)
