@@ -1,4 +1,7 @@
 import json
+from strategy.trend import calc_strategy
+from get_binance import get_all_binance
+from tools import send_post_to_telegram, visualize_candlestick, get_historical_start_date
 import logging
 import os
 import time
@@ -7,10 +10,6 @@ import math
 import traceback
 
 import sqlite3
-
-from get_binance import get_all_binance
-from tools import send_post_to_telegram, visualize_candlestick, get_historical_start_date
-from trend import calc_strategy
 
 logging.basicConfig(format='%(asctime)-15s [%(levelname)s]: %(message)s', level=logging.INFO)
 logger = logging.getLogger('main')
