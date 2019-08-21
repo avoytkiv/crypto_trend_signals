@@ -31,16 +31,25 @@ while True:
                         (df['signal_order'] == 'Close')]
         if df_signals.empty:
             logger.info('No history signals in {}'.format(coin))
+            continue
 
+        df_signals['close_shift'] = df_signals['close'].shift(1)
+        df_signals = df_signals.loc[:, ['close', 'close_shift', 'signal_ffill_shift', 'signal_order']]
+        # Prices
+        open_price = df_signals['close'].iloc[-1]
+        last_price = df['close'].iloc[-1]
         last_signal = df_signals['signal_order'].iloc[-1]
-        if last_signal == 'Long':
-            price_change = (row['close'] - df_signals['close'].iloc[-1]) * 100 / df_signals['close'].iloc[-1]
-        elif last_signal == 'Short':
-            price_change = (df_signals['close'].iloc[-1] - row['close']) * 100 / df_signals['close'].iloc[-1]
+        # Calculate price percent change from open
+        if last_signal != 'Close':
+            open_position_price_chg = last_price - open_price if last_signal == 'Long' else open_price - last_price
+            open_position_price_pct_chg = open_position_price_chg * 100 / open_price
+            logger.info('Result for {} {} opened from {}: {}\n'.format(coin, last_signal, df_signals.index[-1],
+                                                                       open_position_price_pct_chg))
         else:
-            price_change = 0
+            open_position_price_pct_chg = 0
+
         # Send message to channel Криптоисследование 2.0 to reenter because of limits on their platform
-        if price_change >= 5 and df_signals.date.iloc[-1] not in sent_messages[coin]:
+        if open_position_price_pct_chg >= 5 and df_signals.date.iloc[-1] not in sent_messages[coin]:
             sent_messages[coin].append(df_signals.date.iloc[-1])
             msg_ru = 'Цена {} изменилась более чем на 5% в Вашу пользу.\n' \
                      'Пожалуйста, перезайдите в позицию если она была автоматически закрыта.'.format(coin)
@@ -70,7 +79,7 @@ while True:
             logger.info('Close signal in {}'.format(coin))
             # Messages
             msg_eng = '{} {} at {}\nLets move on to next Good trade!'.format(row['signal_order'], coin, row['close'])
-            msg_ru = u'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
+            msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
