@@ -12,10 +12,11 @@ logger = logging.getLogger('main')
 period = 15
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT', 'LTCBTC', 'EOSETH', 'ETHBTC', 'XMRBTC']
 
-d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
-     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
-     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
-     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
+# d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
+#      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
+#      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
+#      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
+d = [{'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'}]
 
 
 sent_messages = defaultdict(list)
@@ -33,8 +34,6 @@ while True:
             logger.info('No history signals in {}'.format(coin))
             continue
 
-        df_signals['close_shift'] = df_signals['close'].shift(1)
-        df_signals = df_signals.loc[:, ['close', 'close_shift', 'signal_ffill_shift', 'signal_order']]
         # Prices
         open_price = df_signals['close'].iloc[-1]
         last_price = df['close'].iloc[-1]
@@ -45,6 +44,7 @@ while True:
             open_position_price_pct_chg = open_position_price_chg * 100 / open_price
             logger.info('Result for {} {} opened from {}: {}'.format(coin, last_signal, df_signals.index[-1],
                                                                        round(open_position_price_pct_chg, 2)))
+            logger.info('{}, sentiment: {}, range: {}'.format(coin, row['prob_ema'], row['ind1']))
         else:
             open_position_price_pct_chg = 0
 
@@ -60,6 +60,7 @@ while True:
 
         if row['signal_order'] == 'Long' or row['signal_order'] == 'Short':
             logger.info('{} signal in {}'.format(row['signal_order'], coin))
+            logger.info('{}, sentiment: {}, range: {}'.format(coin, row['prob_ema'], row['ind1']))
             # Messages
             msg_eng = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
                 row['signal_order'], coin, row['close'])
