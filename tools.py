@@ -120,6 +120,20 @@ def daily_time_intervals(t, period):
     return seq
 
 
+def get_historical_start_date(n_delta_days):
+    """
+    Function returns date for get_all_binance()
+    :param n_delta_days: int, number of days to look back
+    :return: str, day month year for example: 23 August, 2019
+    """
+    now = datetime.now()
+    dmy_str = '{} {}, {}'.format(now.day, now.strftime('%B'), now.year)
+    dmy = datetime.strptime(dmy_str, '%d %B, %Y')
+    start_date = dmy - timedelta(days=n_delta_days)
+
+    return datetime.strftime(start_date, '%d %B, %Y')
+
+
 def find_between(s, first, last ):
     try:
         start = s.index( first ) + len( first )

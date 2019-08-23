@@ -1,6 +1,6 @@
 from trend import calc_strategy
 from get_binance import get_all_binance
-from tools import send_post_to_telegram, visualize_candlestick, daily_time_intervals
+from tools import send_post_to_telegram, visualize_candlestick, daily_time_intervals, get_historical_start_date
 from datetime import datetime
 import logging
 from collections import defaultdict
@@ -30,7 +30,7 @@ sent_messages = defaultdict(list)
 def main():
     logging.info('Retrieve prices for {} assets'.format(len(coins)))
     for coin in coins:
-        df_data = get_all_binance(coin, '{}m'.format(period))
+        df_data = get_all_binance(coin, '{}m'.format(period), start_date=get_historical_start_date(5))
         df = calc_strategy(df_data)
         row = df.iloc[-1]
         # Filter signals

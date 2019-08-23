@@ -8,8 +8,8 @@ api_secret = 'rgp5iv5I0TRc12uqxSQH0APK9ISSHdmhrajtjKlqrghDQVHEhyD5UmAjcsiLzR1V'
 client = Client(api_key, api_secret)
 
 
-def get_all_binance(symbol, kline_size):
-    klines = client.get_historical_klines(symbol, kline_size, '15 August, 2019')
+def get_all_binance(symbol, kline_size, start_date):
+    klines = client.get_historical_klines(symbol, kline_size, start_date)
     data = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time',
                                          'quote_av', 'trades', 'tb_base_av', 'tb_quote_av', 'ignore'])
     # Remove last row of active candle
