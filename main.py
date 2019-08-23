@@ -1,9 +1,10 @@
 from trend import calc_strategy
 from get_binance import get_all_binance
-from tools import send_post_to_telegram, visualize_candlestick
-import time
+from tools import send_post_to_telegram, visualize_candlestick, daily_time_intervals
+from datetime import datetime
 import logging
 from collections import defaultdict
+import pause
 
 
 logging.basicConfig(format='%(asctime)-15s [%(levelname)s]: %(message)s', level=logging.INFO)
@@ -12,15 +13,21 @@ logger = logging.getLogger('main')
 period = 15
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT', 'LTCBTC', 'EOSETH', 'ETHBTC', 'XMRBTC']
 
-# d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
-#      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
-#      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
-#      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
-d = [{'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'}]
+d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
+     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
+     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
+     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
+
+now = datetime.now()
+t = datetime.strptime('{}-{}-{} 00:00:00'.format(now.year, now.month, now.day, now.hour),
+                      '%Y-%m-%d %H:%M:%S')
 
 
+seq = daily_time_intervals(t, period)
 sent_messages = defaultdict(list)
-while True:
+
+
+def main():
     logging.info('Retrieve prices for {} assets'.format(len(coins)))
     for coin in coins:
         df_data = get_all_binance(coin, '{}m'.format(period))
@@ -60,7 +67,6 @@ while True:
 
         if row['signal_order'] == 'Long' or row['signal_order'] == 'Short':
             logger.info('{} signal in {}'.format(row['signal_order'], coin))
-            logger.info('{}, sentiment: {}, range: {}'.format(coin, row['prob_ema'], row['ind1']))
             # Messages
             msg_eng = '{} {} at {}\nThis position is only fraction of our capital. Please, control your risk!'.format(
                 row['signal_order'], coin, row['close'])
@@ -93,5 +99,28 @@ while True:
         else:
             logger.info('No signal in {}'.format(coin))
 
-    logger.info('Sleep...')
-    time.sleep(60 * period)
+
+if __name__ == '__main__':
+    while seq:
+        s = seq[0]
+        if s < now:
+            seq.pop(0)
+            logger.info('Skiped {}'.format(s))
+            continue
+        logger.info('Waiting...Job will start at {}'.format(s))
+        pause.until(datetime(s.year, s.month, s.day, s.hour, s.minute))
+        # do something
+        logger.info('Job started')
+        main()
+        logger.info('Job finished')
+        seq.pop(0)
+        # Check length
+        if len(seq) != 0:
+            continue
+        else:
+            logger.info('Day finished: {}'.format(s))
+            t2 = datetime.strptime('{}-{}-{} 00:00:00'.format(s.year, s.month, s.day, s.hour),
+                                  '%Y-%m-%d %H:%M:%S')
+            # generate new daily sequence
+            seq = daily_time_intervals(t2, period)
+            logger.info('New Day started: {}'.format(t2))
