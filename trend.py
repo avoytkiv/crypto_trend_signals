@@ -30,7 +30,7 @@ class Increment:
 
 
 def calc_strategy(df_data):
-    df_data['timeindex'] = pd.to_datetime(df_data['timestamp'], unit='s')
+    df_data['timeindex'] = pd.to_datetime(df_data['close_time'], unit='ms')
     df_data.set_index('timeindex', inplace=True)
 
     curr_day_df = df_data.resample('1D').agg({
