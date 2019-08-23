@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mdates
-import datetime
 import plotly.graph_objs as go
 import requests
 from urllib.parse import urlencode
+from datetime import timedelta, datetime
 
 
 # def corrdot(*args, **kwargs):
@@ -64,7 +64,7 @@ def visualize_candlestick(df, symbol, period, time):
     """
     if df.shape[0] > 300:
         df = df.tail(300)
-    f = lambda x: mdates.date2num(datetime.datetime.fromtimestamp(x))
+    f = lambda x: mdates.date2num(datetime.fromtimestamp(x))
     df['date2num'] = df['timestamp'].apply(f)
     ohlc = df[['date2num', 'open', 'high', 'low', 'close']].values
     # Making plot area
@@ -102,6 +102,22 @@ def visualize_candlestick(df, symbol, period, time):
     plt.close(fig)
 
     return figure_name
+
+
+def daily_time_intervals(t, period):
+    """
+    Produce equal intervals inside current 24h day
+    :param period: time interval in minutes
+    :param t: current day
+    :return: list of datetimes
+    """
+    seq = []
+    n = int(24 * 60 / period)
+    for x in range(n):
+        t = t + timedelta(minutes=period)
+        seq.append(t)
+
+    return seq
 
 
 def find_between(s, first, last ):
