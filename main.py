@@ -101,7 +101,6 @@ def main2():
     logger.info('Retrieve prices')
     for coin in coins:
         trades = sorted(data[coin], key=lambda i: i['timestamp'])
-        df_trades = pd.DataFrame(trades)
         last_trade = trades[-1]
         last_trade_direction = last_trade['direction']
 
@@ -141,7 +140,7 @@ def main2():
                     else:
                         send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                     send_post_to_telegram('Photo', dic['channel_id'],
-                                          visualize_candlestick(df=df, df_trades=df_trades, symbol=coin, period=period, time=df.index[-1]))
+                                          visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
                     logger.info('Message posted in {}'.format(dic['channel_name']))
             # Close signal
             else:
@@ -156,7 +155,7 @@ def main2():
                     else:
                         send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                     send_post_to_telegram('Photo', dic['channel_id'],
-                                          visualize_candlestick(df=df, df_trades=df_trades, symbol=coin, period=period, time=df.index[-1]))
+                                          visualize_candlestick(df=df, symbol=coin, period=period, time=df.index[-1]))
                     logger.info('Message posted in {}'.format(dic['channel_name']))
         else:
             logger.info('Last trade for {} is {}. Current signal: {}'.format(coin, last_trade_direction, row['signal']))

@@ -6,6 +6,7 @@ import requests
 from urllib.parse import urlencode
 from datetime import timedelta, datetime
 import pandas as pd
+import json
 
 
 # def corrdot(*args, **kwargs):
@@ -55,7 +56,7 @@ def send_post_to_telegram(type, channel_id, message):
     raise RuntimeError('unknown message type: {}'.format(type))
 
 
-def visualize_candlestick(df, df_trades, symbol, period, time):
+def visualize_candlestick(df, symbol, period, time):
     """
     First, we transform time index to matplotlib format timeindex
     :param df: data frame, reset index
@@ -67,6 +68,11 @@ def visualize_candlestick(df, df_trades, symbol, period, time):
         df = df.tail(300)
     f = lambda x: mdates.date2num(datetime.fromtimestamp(x))
     df['date2num'] = df['timestamp'].apply(f)
+
+    with open('history-{}min.json'.format(period), 'r') as outfile:
+        data = json.load(outfile)
+    trades = sorted(data[symbol], key=lambda i: i['timestamp'])
+    df_trades = pd.DataFrame(trades)
     df_trades['date2num'] = df_trades['timestamp'].apply(f)
     df_trades['timeindex'] = pd.to_datetime(df_trades['timestamp'], unit='s')
     df_trades.set_index('timeindex', inplace=True)
