@@ -1,0 +1,65 @@
+{
+    "BTCUSDT": [
+        {
+            "timestamp": 1566674100.0,
+            "price": 10093.9,
+            "direction": "Close"
+        }
+    ],
+    "ETHUSDT": [
+        {
+            "timestamp": 1566676800.0,
+            "price": 189.79,
+            "direction": "Close"
+        }
+    ],
+    "XRPUSDT": [
+        {
+            "timestamp": 1566669600.0,
+            "price": 0.27066,
+            "direction": "Close"
+        }
+    ],
+    "EOSUSDT": [
+        {
+            "timestamp": 1566592200.0,
+            "price": 3.6526,
+            "direction": "Close"
+        }
+    ],
+    "ADAUSDT": [
+        {
+            "timestamp": 1566747900.0,
+            "price": 0.05058,
+            "direction": "Close"
+        }
+    ],
+    "LTCBTC": [
+        {
+            "timestamp": 1566519300.0,
+            "price": 0.007234,
+            "direction": "Close"
+        }
+    ],
+    "EOSETH": [
+        {
+            "timestamp": 1566720900.0,
+            "price": 0.019138,
+            "direction": "Close"
+        }
+    ],
+    "ETHBTC": [
+        {
+            "timestamp": 1566378000.0,
+            "price": 0.018522,
+            "direction": "Close"
+        }
+    ],
+    "XMRBTC": [
+        {
+            "timestamp": 1566778500.0,
+            "price": 0.007913,
+            "direction": "Close"
+        }
+    ]
+}

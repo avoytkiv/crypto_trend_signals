@@ -5,6 +5,7 @@ import plotly.graph_objs as go
 import requests
 from urllib.parse import urlencode
 from datetime import timedelta, datetime
+import pandas as pd
 
 
 # def corrdot(*args, **kwargs):
@@ -54,7 +55,7 @@ def send_post_to_telegram(type, channel_id, message):
     raise RuntimeError('unknown message type: {}'.format(type))
 
 
-def visualize_candlestick(df, symbol, period, time):
+def visualize_candlestick(df, df_trades, symbol, period, time):
     """
     First, we transform time index to matplotlib format timeindex
     :param df: data frame, reset index
@@ -66,6 +67,11 @@ def visualize_candlestick(df, symbol, period, time):
         df = df.tail(300)
     f = lambda x: mdates.date2num(datetime.fromtimestamp(x))
     df['date2num'] = df['timestamp'].apply(f)
+    df_trades['date2num'] = df_trades['timestamp'].apply(f)
+    df_trades['timeindex'] = pd.to_datetime(df_trades['timestamp'], unit='s')
+    df_trades.set_index('timeindex', inplace=True)
+    start_ts = df.index[0]
+    df_trades = df_trades.loc[start_ts:, :]
     ohlc = df[['date2num', 'open', 'high', 'low', 'close']].values
     # Making plot area
     fig = plt.figure()
@@ -74,15 +80,15 @@ def visualize_candlestick(df, symbol, period, time):
     width = .6 / (24 * 60) * period
     candlestick_ohlc(ax1, ohlc, width=width, colorup='grey', colordown='black', alpha=0.75)
     # Making signals overlay
-    buy_signals = df[df['signal_order'] == 'Long']
-    sell_signals = df[df['signal_order'] == 'Short']
-    close_signals = df[df['signal_order'] == 'Close']
+    buy_signals = df_trades[df_trades['direction'] == 'Long']
+    sell_signals = df_trades[df_trades['direction'] == 'Short']
+    close_signals = df_trades[df_trades['direction'] == 'Close']
     # Plot signals
-    plt.scatter(buy_signals['date2num'].values, buy_signals['close'].values, marker='^', c='green',
+    plt.scatter(buy_signals['date2num'].values, buy_signals['price'].values, marker='^', c='green',
                 label='Long', s=70, alpha=1)
-    plt.scatter(sell_signals['date2num'].values, sell_signals['close'].values, marker='v', c='red',
+    plt.scatter(sell_signals['date2num'].values, sell_signals['price'].values, marker='v', c='red',
                 label='Short', s=70, alpha=1)
-    plt.scatter(close_signals['date2num'].values, close_signals['close'].values, marker='X', c='blue',
+    plt.scatter(close_signals['date2num'].values, close_signals['price'].values, marker='X', c='blue',
                 label='Close', s=70, alpha=1)
     # Axis
     ax1.xaxis_date()
