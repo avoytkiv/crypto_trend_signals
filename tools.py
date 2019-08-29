@@ -116,22 +116,6 @@ def visualize_candlestick(df, symbol, period, time):
     return figure_name
 
 
-def daily_time_intervals(t, period):
-    """
-    Produce equal intervals inside current 24h day
-    :param period: time interval in minutes
-    :param t: current day
-    :return: list of datetimes
-    """
-    seq = []
-    n = int(24 * 60 / period)
-    for x in range(n):
-        t = t + timedelta(minutes=period)
-        seq.append(t)
-
-    return seq
-
-
 def get_historical_start_date(n_delta_days):
     """
     Function returns date for get_all_binance()
