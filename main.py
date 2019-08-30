@@ -126,7 +126,7 @@ class Database:
     def insert_trade(self, trade):
         c = self.__connection.cursor()
         c.execute('INSERT INTO trades (symbol, ts, price, direction) VALUES (?, ?, ?, ?)',
-                  (trade['symbol'], int(trade['ts'] * 1000), trade['price'], trade['direction']))
+                  (trade['symbol'], int(trade['timestamp'] * 1000), trade['price'], trade['direction']))
         self.__connection.commit()
         c.close()
 
@@ -138,10 +138,18 @@ class Database:
 
         return {
             'symbol': row[0],
-            'ts': row[1] / 1000,
+            'timestamp': row[1] / 1000,
             'price': row[2],
             'direction': row[3]
         } if row is not None else None
+
+    def fetch_last_trades(self, symbol, limit: int=50):
+        c = self.__connection.cursor()
+        c.execute('SELECT * FROM (SELECT * FROM trades WHERE symbol = ? ORDER BY ts DESC LIMIT ?) ORDER BY ts ASC;', [symbol, limit])
+        rows = c.fetchall()
+        c.close()
+
+        return list(map(lambda row: {'symbol': row[0], 'timestamp': row[1] / 1000, 'price': row[2], 'direction': row[3]}, rows))
 
 
 class Strategy:
@@ -200,7 +208,8 @@ class Strategy:
                             send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
-                                                                    time=df.index[-1]))
+                                                                    time=df.index[-1],
+                                                                    trades=self.__db.fetch_last_trades(coin)))
                         logger.info('Message posted in {}'.format(dic['channel_name']))
                 # Close signal
                 else:
@@ -216,7 +225,8 @@ class Strategy:
                             send_post_to_telegram('Message', dic['channel_id'], msg_eng)
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
-                                                                    time=df.index[-1]))
+                                                                    time=df.index[-1],
+                                                                    trades=self.__db.fetch_last_trades(coin)))
                         logger.info('Message posted in {}'.format(dic['channel_name']))
             else:
                 logger.info(

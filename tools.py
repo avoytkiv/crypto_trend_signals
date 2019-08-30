@@ -56,7 +56,7 @@ def send_post_to_telegram(type, channel_id, message):
     raise RuntimeError('unknown message type: {}'.format(type))
 
 
-def visualize_candlestick(df, symbol, period, time):
+def visualize_candlestick(df, symbol, period, time, trades):
     """
     First, we transform time index to matplotlib format timeindex
     :param df: data frame, reset index
@@ -69,9 +69,6 @@ def visualize_candlestick(df, symbol, period, time):
     f = lambda x: mdates.date2num(datetime.fromtimestamp(x))
     df['date2num'] = df['timestamp'].apply(f)
 
-    with open('history-{}min.json'.format(period), 'r') as outfile:
-        data = json.load(outfile)
-    trades = sorted(data[symbol], key=lambda i: i['timestamp'])
     df_trades = pd.DataFrame(trades)
     df_trades['date2num'] = df_trades['timestamp'].apply(f)
     df_trades['timeindex'] = pd.to_datetime(df_trades['timestamp'], unit='s')
