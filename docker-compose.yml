@@ -8,4 +8,4 @@ services:
     volumes:
       - app-data:/var/lib/trade
     environment:
-      TRADE_DATA_PATH: '/var/lib/trade'
+      - DATA_PATH=/var/lib/trade
