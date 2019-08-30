@@ -1,5 +1,11 @@
 version: '3'
+volumes:
+  app-data:
 services:
   app:
     build: '.'
     container_name: trend_signals
+    volumes:
+      - app-data:/var/lib/trade
+    environment:
+      TRADE_DATA_PATH: '/var/lib/trade'
