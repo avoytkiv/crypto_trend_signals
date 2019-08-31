@@ -185,7 +185,7 @@ class Strategy:
                 # Append new signal
                 self.__db.insert_trade({
                     'symbol': coin,
-                    'ts': row['timestamp'],
+                    'timestamp': row['timestamp'],
                     'price': row['close'],
                     'direction': row['signal']
                 })
