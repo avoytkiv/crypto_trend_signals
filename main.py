@@ -23,7 +23,8 @@ coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT', 'LTCBTC', 'EOSET
 d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
-     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'}]
+     {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'},
+     {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'}]
 
 
 path = './bugs/'
@@ -164,7 +165,6 @@ class Strategy:
         self.__db.__exit__(exc_type, exc_val, exc_tb)
 
     def runone(self):
-        logging.info('Load history trades')
         logger.info('Retrieve prices')
 
         for coin in coins:
@@ -195,17 +195,22 @@ class Strategy:
                 if row['signal'] != 'Close':
                     logger.info('{} signal in {}'.format(row['signal'], coin))
                     # Messages
-                    msg_eng = '{} {} at {}\nThis position is only fraction of our capital.\n' \
+                    msg_eng = '{} {} at {}\nThis position is only 3-5% of our capital.\n' \
                               'Please, control your risk!'.format(row['signal'], coin, row['close'])
-                    msg_ru = '{} {} по {}\nВ эту позицию мы вложили только небольшую часть нашего капитала.\n' \
+                    msg_ru = '{} {} по {}\nВ эту позицию мы вложили только 3-5% нашего капитала.\n' \
                              'Пожалуйста, контролируйте свой риск!'.format(
                         'Купить' if row['signal'] == 'Long' else 'Продать', coin, row['close'])
+                    msg_es = '{} {} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
+                             '¡Por favor controle su riesgo!'.format(
+                        'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
-                        else:
+                        elif dic['lang'] == 'en':
                             send_post_to_telegram('Message', dic['channel_id'], msg_eng)
+                        else:
+                            send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
                                                                     time=df.index[-1],
@@ -217,12 +222,15 @@ class Strategy:
                     # Messages
                     msg_eng = 'Cover {} at {}\nLets move on to next Good trade!'.format(coin, row['close'])
                     msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
+                    msg_es = 'Posición cerrada en {} por {}\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'])
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
-                        else:
+                        elif dic['lang'] == 'en':
                             send_post_to_telegram('Message', dic['channel_id'], msg_eng)
+                        else:
+                            send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
                                                                     time=df.index[-1],
