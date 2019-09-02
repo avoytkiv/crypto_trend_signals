@@ -21,8 +21,8 @@ period = 15
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT', 'LTCBTC', 'EOSETH', 'ETHBTC', 'XMRBTC']
 
 d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
-     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
-     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
+     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'en'},
+     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'en'},
      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'},
      {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'}]
 
@@ -195,7 +195,7 @@ class Strategy:
                 if row['signal'] != 'Close':
                     logger.info('{} signal in {}'.format(row['signal'], coin))
                     # Messages
-                    msg_eng = '{} {} at {}\nThis position is only 3-5% of our capital.\n' \
+                    msg_en = '{} {} at {}\nThis position is only 3-5% of our capital.\n' \
                               'Please, control your risk!'.format(row['signal'], coin, row['close'])
                     msg_ru = '{} {} по {}\nВ эту позицию мы вложили только 3-5% нашего капитала.\n' \
                              'Пожалуйста, контролируйте свой риск!'.format(
@@ -208,7 +208,7 @@ class Strategy:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                         elif dic['lang'] == 'en':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_eng)
+                            send_post_to_telegram('Message', dic['channel_id'], msg_en)
                         else:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
@@ -220,7 +220,7 @@ class Strategy:
                 else:
                     logger.info('Close signal in {}'.format(coin))
                     # Messages
-                    msg_eng = 'Cover {} at {}\nLets move on to next Good trade!'.format(coin, row['close'])
+                    msg_en = 'Cover {} at {}\nLets move on to next Good trade!'.format(coin, row['close'])
                     msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
                     msg_es = 'Posición cerrada en {} por {}\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'])
                     # Send messages to channels
@@ -228,7 +228,7 @@ class Strategy:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                         elif dic['lang'] == 'en':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_eng)
+                            send_post_to_telegram('Message', dic['channel_id'], msg_en)
                         else:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
