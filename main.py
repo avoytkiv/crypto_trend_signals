@@ -2,10 +2,7 @@ import json
 import logging
 import os
 import time
-from collections import defaultdict
-from datetime import datetime
 
-import pandas as pd
 import sqlite3
 
 from get_binance import get_all_binance
@@ -25,56 +22,6 @@ d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571',
      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'en'},
      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'},
      {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'}]
-
-
-path = './bugs/'
-
-
-def compare_dfs(df1_filename, df2_filename):
-    df1 = pd.read_csv(path+df1_filename)
-    ls_ix = df1.columns.get_loc('support_04')
-    df1 = df1.iloc[:, 1:ls_ix]
-    df1 = df1.fillna(0)
-    df1 = df1.applymap(lambda x: 1 if x == True else x)
-    df1 = df1.applymap(lambda x: 0 if x == False else x)
-    df2 = pd.read_csv(path+df2_filename)
-    df2 = df2.iloc[:, 1:ls_ix]
-    df2 = df2.fillna(0)
-    df2 = df2.applymap(lambda x: 1 if x == True else x)
-    df2 = df2.applymap(lambda x: 0 if x == False else x)
-    df2_copy = df2[:-1]
-    df3 = df1.subtract(df2_copy)
-    df3.loc["Total"] = df3.sum()
-    return df1, df2, df2_copy, df3
-
-# compare_dfs('ETHUSDT-2019-08-23 19:04:12.884645.csv', 'ETHUSDT-2019-08-23 19:05:10.929608.csv')
-
-def save_dfs(coin='ETHUSDT'):
-    df_data = get_all_binance(coin, '{}m'.format(period), start_date=get_historical_start_date(1))
-    df = calc_strategy(df_data)
-    filename = '{}-{}.csv'.format(coin, datetime.now())
-    df.to_csv(path+filename)
-
-
-default_trades = defaultdict(list)
-def get_last_orders():
-    for coin in coins:
-        df_data = get_all_binance(coin, '{}m'.format(period), get_historical_start_date(10))
-        df = calc_strategy(df_data)
-        # Filter signals
-        df_signals = df[(df['signal_order'] == 'Long') |
-                        (df['signal_order'] == 'Short') |
-                        (df['signal_order'] == 'Close')]
-        if df_signals.empty:
-            logger.info('No signals {}'.format(coin))
-            continue
-        row = df_signals.iloc[-1]
-
-        default_trades[coin].append({'timestamp': row['timestamp'],
-                                     'price': row['close'],
-                                     'direction': row['signal_order']})
-        logger.info('Appended {} to dict'.format(coin))
-    return default_trades
 
 
 class Database:
