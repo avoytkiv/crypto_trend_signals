@@ -2,6 +2,9 @@ import json
 import logging
 import os
 import time
+import pandas as pd
+import math
+import traceback
 
 import sqlite3
 
@@ -99,6 +102,70 @@ class Database:
 
         return list(map(lambda row: {'symbol': row[0], 'timestamp': row[1] / 1000, 'price': row[2], 'direction': row[3]}, rows))
 
+    def fetch_all(self, symbol):
+        c = self.__connection.cursor()
+        c.execute('SELECT * FROM trades WHERE symbol = ? ORDER BY ts ASC;', [symbol])
+        rows = c.fetchall()
+        c.close()
+
+        return rows
+
+
+# with Database(datadir='./data/') as db:
+#     all_dfs = pd.DataFrame()
+#     for coin in coins:
+#         all_trades = db.fetch_all(coin)
+#         df = pd.DataFrame(all_trades, columns=['symbol', 'timestamp', 'price', 'direction'])
+#
+#         if df.empty:
+#             logger.info('No signals in {}'.format(coin))
+#             continue
+#         if df['direction'].iloc[-1] != 'Close':
+#             logger.info('Retrieve prices')
+#             btc_usdt = get_all_binance(coin, '{}m'.format(period), get_historical_start_date(1))
+#             df = df.append(pd.DataFrame([[coin, btc_usdt['timestamp'].iloc[-1] * 1000, btc_usdt['close'].iloc[-1], 'Close']],
+#                                         columns=df.columns))
+#
+#         df['price_shift'] = df['price'].shift(1)
+#         df['direction_shift'] = df['direction'].shift(1)
+#         # Difference between previous signal price and current signal price
+#         df['diff'] = (df['price'] - df['price_shift']) / df['price_shift']
+#         # Count short positions to opposite value and if first signal after close then zero pnl
+#         df['diff'] = df.apply(lambda row: -1 * row['diff'] if row['direction_shift'] == 'Short' else row['diff'], axis=1)
+#         df['diff'] = df.apply(lambda row: 0 if row['direction_shift'] == 'Close' else row['diff'], axis=1)
+#
+#         df = df.dropna()
+#
+#         all_dfs = pd.concat([all_dfs, df])
+#     all_dfs.reset_index()
+#     all_dfs['timeindex'] = pd.to_datetime(all_dfs['timestamp'], unit='ms')
+#     all_dfs.set_index('timeindex', inplace=True)
+#     #
+#     ix_values = all_dfs.index.values
+#
+#     curr_t = time.time()
+#     first_trade_t = all_dfs['timestamp'].min()/1000
+#     diff_days = math.ceil((curr_t - first_trade_t) / (60 * 60 * 24))
+#     btc_usdt = get_all_binance('BTCUSDT', '{}m'.format(period), get_historical_start_date(diff_days))
+#     btc_usdt['timeindex'] = pd.to_datetime(btc_usdt['timestamp'], unit='s')
+#     btc_usdt.set_index('timeindex', inplace=True)
+#     btc_usdt_ix = btc_usdt.loc[ix_values, :]
+#
+#     all_dfs = pd.concat([all_dfs, btc_usdt_ix['close']], axis=1)
+#
+#     all_dfs['btcusdt_shift'] = all_dfs['close'].shift(1)
+#     # Difference between previous signal price and current signal price
+#     all_dfs['diff_btcusdt'] = (all_dfs['close'] - all_dfs['btcusdt_shift']) / all_dfs['btcusdt_shift']
+#     # Count short positions to opposite value and if first signal after close then zero pnl
+#     all_dfs['diff_btcusdt'] = all_dfs.apply(lambda row: 0 if 'USDT' in row['symbol'] else row['diff_btcusdt'], axis=1)
+#     all_dfs['diff_btcusdt'] = all_dfs.apply(lambda row: 0 if row['direction_shift'] == 'Close' else row['diff_btcusdt'], axis=1)
+#     all_dfs['total_diff'] = all_dfs['diff'] + all_dfs['diff_btcusdt']
+#     all_dfs['investment'] = 2000
+#     all_dfs['usd_pnl'] = all_dfs['investment'] * all_dfs['total_diff']
+#     all_dfs = all_dfs.sort_values('timestamp')
+#     # Save
+#     all_dfs.to_csv('./data/'+'stats.csv')
+
 
 class Strategy:
     def __init__(self, datadir: str):
@@ -194,15 +261,19 @@ if __name__ == '__main__':
 
     with Strategy(data_dir) as strategy:
         while True:
-            interval = 15 * 60 * 1000
-            run_delay = 3000
-            now = int(time.time() * 1000)
-            next_run = now - now % interval + interval + run_delay
-            sleep_time = (next_run - now) * 0.001
-            logger.info('Waiting...Job will start in {0:.3f} seconds'.format(sleep_time))
-            time.sleep(sleep_time)
+            try:
+                interval = 15 * 60 * 1000
+                run_delay = 3000
+                now = int(time.time() * 1000)
+                next_run = now - now % interval + interval + run_delay
+                sleep_time = (next_run - now) * 0.001
+                logger.info('Waiting...Job will start in {0:.3f} seconds'.format(sleep_time))
+                time.sleep(sleep_time)
 
-            # do something
-            logger.info('Job started')
-            strategy.runone()
-            logger.info('Job finished')
+                # do something
+                logger.info('Job started')
+                strategy.runone()
+                logger.info('Job finished')
+            except:
+                traceback.print_exc()
+                time.sleep(3)

@@ -1,6 +1,5 @@
 import pandas as pd
 from binance.client import Client
-from binance.exceptions import BinanceAPIException
 
 
 api_key = 'L8wvQXOvuHXcl2xMjiQ3vP7OPMg3G9wOMSzX86OTug7X9GwXHS80wgfWkAQfZB54'
