@@ -261,6 +261,35 @@ class Strategy:
                                                                           round(pct_chg, 2),
                                                                           round(row['prob_ema'], 2),
                                                                           row['ind1']))
+                # Stop loss
+                if pct_chg < -3:
+                    # Append signal
+                    self.__db.insert_trade({
+                        'symbol': coin,
+                        'timestamp': row['timestamp'],
+                        'price': row['close'],
+                        'direction': 'Close'})
+
+                    logger.info('Stop loss signal in {}'.format(coin))
+                    # Messages
+                    msg_en = 'Cover {} at {}\nLets move on to next Good trade!'.format(coin, row['close'])
+                    msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
+                    msg_es = 'Posición cerrada en {} por {}\n¡Pasemos al próximo buen comercio!'.format(coin,
+                                                                                                        row['close'])
+                    # Send messages to channels
+                    for dic in d:
+                        if dic['lang'] == 'ru':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                        elif dic['lang'] == 'en':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_en)
+                        else:
+                            send_post_to_telegram('Message', dic['channel_id'], msg_es)
+                        send_post_to_telegram('Photo', dic['channel_id'],
+                                              visualize_candlestick(df=df, symbol=coin, period=period,
+                                                                    time=df.index[-1],
+                                                                    trades=self.__db.fetch_last_trades(coin)))
+                        logger.info('Message posted in {}'.format(dic['channel_name']))
+
                 continue
 
 
