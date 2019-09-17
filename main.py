@@ -184,11 +184,16 @@ class Strategy:
         for coin in coins:
             last_trade = self.__db.fetch_last_trade(coin)
             last_trade_direction = last_trade.get('direction')
+            last_trade_price = last_trade.get('price')
 
             # Get data and calculate strategy
             df_data = get_all_binance(coin, '{}m'.format(period), start_date=get_historical_start_date(5))
             df = calc_strategy(df_data)
             row = df.iloc[-1]
+
+            # Change
+            pct_chg = (row['close'] - last_trade_price) * 100 / last_trade_price if last_trade_direction == 'Long' else \
+                (last_trade_price - row['close']) * 100 / row['close'] if last_trade_direction == 'Short' else 0
 
             # current_position
             if (row['signal'] == 'Long' and last_trade_direction != 'Long') \
@@ -251,8 +256,11 @@ class Strategy:
                                                                     trades=self.__db.fetch_last_trades(coin)))
                         logger.info('Message posted in {}'.format(dic['channel_name']))
             else:
-                logger.info(
-                    'Last trade for {} is {}. Current signal: {}'.format(coin, last_trade_direction, row['signal']))
+                logger.info('{}, {}, chg: {}, prob: {}, range: {}'.format(coin,
+                                                                          last_trade_direction,
+                                                                          pct_chg,
+                                                                          row['prob_ema'],
+                                                                          row['ind1']))
                 continue
 
 
