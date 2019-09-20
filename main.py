@@ -215,12 +215,12 @@ class Strategy:
                 if row['signal'] != 'Close':
                     logger.info('{} signal in {}'.format(row['signal'], coin))
                     # Messages
-                    msg_en = '{} {} at {}\nThis position is only 3-5% of our capital.\n' \
+                    msg_en = '{} #{} at {}\nThis position is only 3-5% of our capital.\n' \
                               'Please, control your risk!'.format(row['signal'], coin, row['close'])
-                    msg_ru = '{} {} по {}\nВ эту позицию мы вложили только 3-5% нашего капитала.\n' \
+                    msg_ru = '{} #{} по {}\nВ эту позицию мы вложили только 3-5% нашего капитала.\n' \
                              'Пожалуйста, контролируйте свой риск!'.format(
                         'Купить' if row['signal'] == 'Long' else 'Продать', coin, row['close'])
-                    msg_es = '{} {} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
+                    msg_es = '{} #{} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
                              '¡Por favor controle su riesgo!'.format(
                         'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
                     # Send messages to channels
