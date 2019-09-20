@@ -194,6 +194,7 @@ class Strategy:
             # Change
             pct_chg = (row['close'] - last_trade_price) * 100 / last_trade_price if last_trade_direction == 'Long' else \
                 (last_trade_price - row['close']) * 100 / last_trade_price if last_trade_direction == 'Short' else 0
+            pct_chg = round(pct_chg, 2)
 
             # current_position
             if (row['signal'] == 'Long' and last_trade_direction != 'Long') \
@@ -239,9 +240,9 @@ class Strategy:
                 else:
                     logger.info('Close signal in {}'.format(coin))
                     # Messages
-                    msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
-                    msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
-                    msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'], pct_chg)
+                    msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
+                    msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
+                    msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'], pct_chg)
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
