@@ -239,9 +239,9 @@ class Strategy:
                 else:
                     logger.info('Close signal in {}'.format(coin))
                     # Messages
-                    msg_en = 'Cover {} at {}\nLets move on to next Good trade!'.format(coin, row['close'])
-                    msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
-                    msg_es = 'Posición cerrada en {} por {}\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'])
+                    msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
+                    msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
+                    msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'], pct_chg)
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
