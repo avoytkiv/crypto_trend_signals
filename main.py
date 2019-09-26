@@ -137,31 +137,12 @@ class Database:
 #         df = df.dropna()
 #
 #         all_dfs = pd.concat([all_dfs, df])
+#
 #     all_dfs.reset_index()
 #     all_dfs['timeindex'] = pd.to_datetime(all_dfs['timestamp'], unit='ms')
 #     all_dfs.set_index('timeindex', inplace=True)
-#     #
-#     ix_values = all_dfs.index.values
-#
-#     curr_t = time.time()
-#     first_trade_t = all_dfs['timestamp'].min()/1000
-#     diff_days = math.ceil((curr_t - first_trade_t) / (60 * 60 * 24))
-#     btc_usdt = get_all_binance('BTCUSDT', '{}m'.format(period), get_historical_start_date(diff_days))
-#     btc_usdt['timeindex'] = pd.to_datetime(btc_usdt['timestamp'], unit='s')
-#     btc_usdt.set_index('timeindex', inplace=True)
-#     btc_usdt_ix = btc_usdt.loc[ix_values, :]
-#
-#     all_dfs = pd.concat([all_dfs, btc_usdt_ix['close']], axis=1)
-#
-#     all_dfs['btcusdt_shift'] = all_dfs['close'].shift(1)
-#     # Difference between previous signal price and current signal price
-#     all_dfs['diff_btcusdt'] = (all_dfs['close'] - all_dfs['btcusdt_shift']) / all_dfs['btcusdt_shift']
-#     # Count short positions to opposite value and if first signal after close then zero pnl
-#     all_dfs['diff_btcusdt'] = all_dfs.apply(lambda row: 0 if 'USDT' in row['symbol'] else row['diff_btcusdt'], axis=1)
-#     all_dfs['diff_btcusdt'] = all_dfs.apply(lambda row: 0 if row['direction_shift'] == 'Close' else row['diff_btcusdt'], axis=1)
-#     all_dfs['total_diff'] = all_dfs['diff'] + all_dfs['diff_btcusdt']
 #     all_dfs['investment'] = 2000
-#     all_dfs['usd_pnl'] = all_dfs['investment'] * all_dfs['total_diff']
+#     all_dfs['usd_pnl'] = all_dfs['investment'] * all_dfs['diff']
 #     all_dfs = all_dfs.sort_values('timestamp')
 #     # Save
 #     all_dfs.to_csv('./data/'+'stats.csv')
@@ -273,10 +254,9 @@ class Strategy:
 
                     logger.info('Stop loss signal in {}'.format(coin))
                     # Messages
-                    msg_en = 'Cover {} at {}\nLets move on to next Good trade!'.format(coin, row['close'])
-                    msg_ru = 'Закрыть {} по {}\nПереходим к следующему хорошему трейду!'.format(coin, row['close'])
-                    msg_es = 'Posición cerrada en {} por {}\n¡Pasemos al próximo buen comercio!'.format(coin,
-                                                                                                        row['close'])
+                    msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
+                    msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
+                    msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(coin,row['close'], pct_chg)
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
