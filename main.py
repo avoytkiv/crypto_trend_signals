@@ -24,7 +24,8 @@ d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571',
      {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'en'},
      {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'en'},
      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'},
-     {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'}]
+     {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'},
+     {'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'en'}]
 
 
 class Database:
@@ -111,41 +112,47 @@ class Database:
         return rows
 
 
-# with Database(datadir='./data/') as db:
-#     all_dfs = pd.DataFrame()
-#     for coin in coins:
-#         all_trades = db.fetch_all(coin)
-#         df = pd.DataFrame(all_trades, columns=['symbol', 'timestamp', 'price', 'direction'])
-#
-#         if df.empty:
-#             logger.info('No signals in {}'.format(coin))
-#             continue
-#         if df['direction'].iloc[-1] != 'Close':
-#             logger.info('Retrieve prices')
-#             btc_usdt = get_all_binance(coin, '{}m'.format(period), get_historical_start_date(1))
-#             df = df.append(pd.DataFrame([[coin, btc_usdt['timestamp'].iloc[-1] * 1000, btc_usdt['close'].iloc[-1], 'Close']],
-#                                         columns=df.columns))
-#
-#         df['price_shift'] = df['price'].shift(1)
-#         df['direction_shift'] = df['direction'].shift(1)
-#         # Difference between previous signal price and current signal price
-#         df['diff'] = (df['price'] - df['price_shift']) / df['price_shift']
-#         # Count short positions to opposite value and if first signal after close then zero pnl
-#         df['diff'] = df.apply(lambda row: -1 * row['diff'] if row['direction_shift'] == 'Short' else row['diff'], axis=1)
-#         df['diff'] = df.apply(lambda row: 0 if row['direction_shift'] == 'Close' else row['diff'], axis=1)
-#
-#         df = df.dropna()
-#
-#         all_dfs = pd.concat([all_dfs, df])
-#
-#     all_dfs.reset_index()
-#     all_dfs['timeindex'] = pd.to_datetime(all_dfs['timestamp'], unit='ms')
-#     all_dfs.set_index('timeindex', inplace=True)
-#     all_dfs['investment'] = 2000
-#     all_dfs['usd_pnl'] = all_dfs['investment'] * all_dfs['diff']
-#     all_dfs = all_dfs.sort_values('timestamp')
-#     # Save
-#     all_dfs.to_csv('./data/'+'stats.csv')
+with Database(datadir='./data/') as db:
+    all_dfs = pd.DataFrame()
+    for coin in coins:
+        all_trades = db.fetch_all(coin)
+        df = pd.DataFrame(all_trades, columns=['symbol', 'timestamp', 'price', 'direction'])
+
+        if df.empty:
+            logger.info('No signals in {}'.format(coin))
+            continue
+        if df['direction'].iloc[-1] != 'Close':
+            logger.info('Retrieve prices')
+            btc_usdt = get_all_binance(coin, '{}m'.format(period), get_historical_start_date(1))
+            df = df.append(pd.DataFrame([[coin, btc_usdt['timestamp'].iloc[-1] * 1000, btc_usdt['close'].iloc[-1], 'Close']],
+                                        columns=df.columns))
+
+        df['price_shift'] = df['price'].shift(1)
+        df['direction_shift'] = df['direction'].shift(1)
+        # Difference between previous signal price and current signal price
+        df['diff'] = (df['price'] - df['price_shift']) / df['price_shift']
+        # Count short positions to opposite value and if first signal after close then zero pnl
+        df['diff'] = df.apply(lambda row: -1 * row['diff'] if row['direction_shift'] == 'Short' else row['diff'], axis=1)
+        df['diff'] = df.apply(lambda row: 0 if row['direction_shift'] == 'Close' else row['diff'], axis=1)
+
+        df = df.dropna()
+
+        all_dfs = pd.concat([all_dfs, df])
+
+    all_dfs.reset_index()
+    all_dfs['timeindex'] = pd.to_datetime(all_dfs['timestamp'], unit='ms')
+    all_dfs.set_index('timeindex', inplace=True)
+    all_dfs['investment'] = 2000
+    all_dfs['pnl'] = all_dfs['investment'] * all_dfs['diff']
+    all_dfs = all_dfs.sort_values('timestamp')
+    all_dfs.drop('timestamp', axis=1, inplace=True)
+    all_dfs = all_dfs.loc[all_dfs['pnl'] != 0]
+    all_dfs['cum_pnl'] = all_dfs['pnl'].cumsum()
+    all_dfs['total'] = all_dfs['cum_pnl'] + 10000
+    # Rename
+    all_dfs.rename({'direction_shift': 'open_direction', 'price_shift': 'open_price', 'price': 'close_price'}, axis=1, inplace=True)
+    # Save
+    all_dfs.to_csv('./data/'+'stats.csv')
 
 
 class Strategy:
