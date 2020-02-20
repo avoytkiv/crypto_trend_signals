@@ -27,6 +27,8 @@ d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571',
      {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'},
      {'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'en'}]
 
+icid_link = lambda coin: 'https://app.stormgain.com/deeplink.html?mobile=instrument/instruments/{0}&desktop=%23modal_newInvest_{0}&icid=academy_sgcrypto_eng_telegram'.format(coin)
+
 
 class Database:
     def __init__(self, datadir: str):
@@ -211,12 +213,17 @@ class Strategy:
                     msg_es = '{} #{} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
                              '¡Por favor controle su riesgo!'.format(
                         'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
+                    msg_en_stormgain = '{} #{} at {}\nThis position is only 3-5% of our capital.\n' \
+                             '[Please, press the link to open terminal!]({})'.format(row['signal'], coin, row['close'], icid_link(coin))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                         elif dic['lang'] == 'en':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_en)
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en)
                         else:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
