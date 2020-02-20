@@ -238,12 +238,16 @@ class Strategy:
                     msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
                     msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
                     msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'], pct_chg)
+                    msg_en_stormgain = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n\n[Please, press the link to open terminal!]({}'.format(coin, row['close'], pct_chg, icid_link(coin))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                         elif dic['lang'] == 'en':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_en)
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en)
                         else:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
@@ -271,12 +275,17 @@ class Strategy:
                     msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
                     msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
                     msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(coin,row['close'], pct_chg)
+                    msg_en_stormgain = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n\n[Please, press the link to open terminal!]({}'.format(
+                        coin, row['close'], pct_chg, icid_link(coin))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
                             send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                         elif dic['lang'] == 'en':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_en)
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en)
                         else:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
