@@ -45,7 +45,7 @@ def send_post_to_telegram(type, channel_id, message):
     query = {
         'chat_id': channel_id
     }
-    get_final_url = lambda: '{}{}/send{}?{}'.format(url, token, type, urlencode(query))
+    get_final_url = lambda: '{}{}/send{}?{}&parse_mode=Markdown'.format(url, token, type, urlencode(query))
     if type == 'Message':
         query['text'] = message
         return requests.post(get_final_url())
