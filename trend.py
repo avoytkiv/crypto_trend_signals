@@ -40,80 +40,128 @@ def calc_strategy(df_data):
         'close': 'last',
     })
 
-    daily_indexes = curr_day_df.index.values
-    daily_indexes = np.append(daily_indexes, df_data.index.values[-1])
-    list_of_dfs = [df_data.loc[daily_indexes[n]:daily_indexes[n + 1]] for n in range(len(daily_indexes) - 1)]
+    # daily_indexes = curr_day_df.index.values
+    # daily_indexes = np.append(daily_indexes, df_data.index.values[-1])
+    # list_of_dfs = [df_data.loc[daily_indexes[n]:daily_indexes[n + 1]] for n in range(len(daily_indexes) - 1)]
 
-    df = pd.DataFrame()
-    prev_d_high = np.nan
-    prev_d_low = np.nan
-    prev_d_close = np.nan
-    for sample in list_of_dfs:
-        sample['d_high'] = sample['high'].cummax(axis=0)
-        sample['d_low'] = sample['low'].cummin(axis=0)
-        sample['d_open'] = sample['open'].values[0]
-        sample['d_close'] = sample['close']
+    df = df_data.copy()
+    # prev_d_high = np.nan
+    # prev_d_low = np.nan
+    # prev_d_close = np.nan
+    # for sample in list_of_dfs:
+    #     sample['d_high'] = sample['high'].cummax(axis=0)
+    #     sample['d_low'] = sample['low'].cummin(axis=0)
+    #     sample['d_open'] = sample['open'].values[0]
+    #     sample['d_close'] = sample['close']
+    #
+    #     sample['prev_d_high'] = prev_d_high
+    #     sample['prev_d_low'] = prev_d_low
+    #     sample['prev_d_close'] = prev_d_close
+    #
+    #     prev_d_high = sample['d_high'].iloc[-1]
+    #     prev_d_low = sample['d_low'].iloc[-1]
+    #     prev_d_close = sample['d_close'].iloc[-1]
+    #
+    #     df = df.append(sample)
+    #     df = df.drop_duplicates(subset='timestamp', keep='last')
 
-        sample['prev_d_high'] = prev_d_high
-        sample['prev_d_low'] = prev_d_low
-        sample['prev_d_close'] = prev_d_close
+    D_high = [curr_day_df['high'].iloc[-1], curr_day_df['high'].iloc[-2]]
+    D_low = [curr_day_df['low'].iloc[-1], curr_day_df['low'].iloc[-2]]
+    D_open = [curr_day_df['open'].iloc[-1], curr_day_df['open'].iloc[-2]]
+    D_close = [curr_day_df['close'].iloc[-1], curr_day_df['close'].iloc[-2]]
 
-        prev_d_high = sample['d_high'].iloc[-1]
-        prev_d_low = sample['d_low'].iloc[-1]
-        prev_d_close = sample['d_close'].iloc[-1]
+    # def daily_candle_compare(prev_high, prev_low, prev_close, curr_high, curr_low, curr_open, curr_close):
+    #     InsideDown = curr_high <= prev_high and curr_low >= prev_low and curr_close <= curr_open
+    #     InsideUp = curr_high <= prev_high and curr_low >= prev_low and curr_close > curr_open
+    #     OutsideInsideDownTrans = curr_high > prev_high and curr_close <= prev_high and curr_close > curr_open
+    #     OutsideInsideUpTrans = curr_low < prev_low and curr_close >= prev_low and curr_close < curr_open
+    #     RdrUp = curr_low < prev_low and curr_close > curr_open and curr_close >= prev_low
+    #     RdrDown = curr_high > prev_high and curr_close < curr_open and curr_close <= prev_high
+    #     OutsideUp = curr_close > prev_high and curr_close >= curr_open
+    #     OutsideDown = curr_close < prev_low and curr_close <= curr_open
+    #     GapUp_Red1 = curr_close > prev_high and curr_close < curr_open and (
+    #             (curr_close - prev_close) >= (curr_open - curr_close))
+    #     GapUp_Red2 = curr_close > prev_high and curr_close < curr_open and (
+    #             (curr_close - prev_close) < (curr_open - curr_close))
+    #     GapDown_Green1 = curr_close < prev_low and curr_close > curr_open and (
+    #             (prev_close - curr_close) >= (curr_close - curr_open))
+    #     GapDown_Green2 = curr_close < prev_low and curr_close > curr_open and (
+    #             (prev_close - curr_close) < (curr_close - curr_open))
+    #
+    #     candle = 0
+    #     if InsideDown:
+    #         candle = -b
+    #     elif InsideUp:
+    #         candle = b
+    #     elif OutsideInsideDownTrans:
+    #         candle = -b
+    #     elif OutsideInsideUpTrans:
+    #         candle = b
+    #     elif RdrUp:
+    #         candle = a
+    #     elif RdrDown:
+    #         candle = -a
+    #     elif OutsideUp:
+    #         candle = a
+    #     elif OutsideDown:
+    #         candle = -a
+    #     elif GapUp_Red1:
+    #         candle = b
+    #     elif GapUp_Red2:
+    #         candle = -b
+    #     elif GapDown_Green1:
+    #         candle = -b
+    #     elif GapDown_Green2:
+    #         candle = b
+    #
+    #     return candle
+    #
+    # df['candle'] = df.apply(lambda row: daily_candle_compare(row['prev_d_high'], row['prev_d_low'], row['prev_d_close'],
+    #                                                          row['d_high'], row['d_low'], row['d_open'],
+    #                                                          row['d_close']), axis=1)
 
-        df = df.append(sample)
-        df = df.drop_duplicates(subset='timestamp', keep='last')
+    InsideDown = D_high[0] <= D_high[1] and D_low[0] >= D_low[1] and D_close[0] <= D_open[0]
+    InsideUp = D_high[0] <= D_high[1] and D_low[0] >= D_low[1] and D_close[0] > D_open[0]
+    OutsideInsideDownTrans = D_high[0] > D_high[1] and D_close[0] <= D_high[1] and D_close[0] > D_open[0]
+    OutsideInsideUpTrans = D_low[0] < D_low[1] and D_close[0] >= D_low[1] and D_close[0] < D_open[0]
+    RdrUp = D_low[0] < D_low[1] and D_close > D_open and D_close[0] >= D_low[1]
+    RdrDown = D_high[0] > D_high[1] and D_close[0] < D_open[0] and D_close[0] <= D_high[1]
+    OutsideUp = D_close[0] > D_high[1] and D_close[0] >= D_open[0]
+    OutsideDown = D_close[0] < D_low[1] and D_close[0] <= D_open[0]
+    GapUp_Red1 = D_close[0] > D_high[1] and D_close[0] < D_open[0] and (
+            (D_close[0] - D_close[1]) >= (D_open[0] - D_close[0]))
+    GapUp_Red2 = D_close[0] > D_high[1] and D_close[0] < D_open[0] and (
+            (D_close[0] - D_close[1]) < (D_open[0] - D_close[0]))
+    GapDown_Green1 = D_close[0] < D_low[1] and D_close[0] > D_open[0] and (
+            (D_close[1] - D_close[0]) >= (D_close[0] - D_open[0]))
+    GapDown_Green2 = D_close[0] < D_low[1] and D_close[0] > D_open[0] and (
+            (D_close[1] - D_close[0]) < (D_close[0] - D_open[0]))
 
-    def daily_candle_compare(prev_high, prev_low, prev_close, curr_high, curr_low, curr_open, curr_close):
-        InsideDown = curr_high <= prev_high and curr_low >= prev_low and curr_close <= curr_open
-        InsideUp = curr_high <= prev_high and curr_low >= prev_low and curr_close > curr_open
-        OutsideInsideDownTrans = curr_high > prev_high and curr_close <= prev_high and curr_close > curr_open
-        OutsideInsideUpTrans = curr_low < prev_low and curr_close >= prev_low and curr_close < curr_open
-        RdrUp = curr_low < prev_low and curr_close > curr_open and curr_close >= prev_low
-        RdrDown = curr_high > prev_high and curr_close < curr_open and curr_close <= prev_high
-        OutsideUp = curr_close > prev_high and curr_close >= curr_open
-        OutsideDown = curr_close < prev_low and curr_close <= curr_open
-        GapUp_Red1 = curr_close > prev_high and curr_close < curr_open and (
-                (curr_close - prev_close) >= (curr_open - curr_close))
-        GapUp_Red2 = curr_close > prev_high and curr_close < curr_open and (
-                (curr_close - prev_close) < (curr_open - curr_close))
-        GapDown_Green1 = curr_close < prev_low and curr_close > curr_open and (
-                (prev_close - curr_close) >= (curr_close - curr_open))
-        GapDown_Green2 = curr_close < prev_low and curr_close > curr_open and (
-                (prev_close - curr_close) < (curr_close - curr_open))
-
-        candle = 0
-        if InsideDown:
-            candle = -b
-        elif InsideUp:
-            candle = b
-        elif OutsideInsideDownTrans:
-            candle = -b
-        elif OutsideInsideUpTrans:
-            candle = b
-        elif RdrUp:
-            candle = a
-        elif RdrDown:
-            candle = -a
-        elif OutsideUp:
-            candle = a
-        elif OutsideDown:
-            candle = -a
-        elif GapUp_Red1:
-            candle = b
-        elif GapUp_Red2:
-            candle = -b
-        elif GapDown_Green1:
-            candle = -b
-        elif GapDown_Green2:
-            candle = b
-
-        return candle
-
-    df['candle'] = df.apply(lambda row: daily_candle_compare(row['prev_d_high'], row['prev_d_low'], row['prev_d_close'],
-                                                             row['d_high'], row['d_low'], row['d_open'],
-                                                             row['d_close']), axis=1)
+    candle = None
+    if InsideDown:
+        candle = -b
+    elif InsideUp:
+        candle = b
+    elif OutsideInsideDownTrans:
+        candle = -b
+    elif OutsideInsideUpTrans:
+        candle = b
+    elif RdrUp:
+        candle = a
+    elif RdrDown:
+        candle = -a
+    elif OutsideUp:
+        candle = a
+    elif OutsideDown:
+        candle = -a
+    elif GapUp_Red1:
+        candle = b
+    elif GapUp_Red2:
+        candle = -b
+    elif GapDown_Green1:
+        candle = -b
+    elif GapDown_Green2:
+        candle = b
 
     df['dhigh'] = df['high'].diff()
     df['dlow'] = df['low'].diff()
@@ -177,23 +225,23 @@ def calc_strategy(df_data):
     df['resistance_00'].fillna(inplace=True, method='ffill')
     df['resistance_01'] = df.loc[df['resistance_00'].diff().fillna(0) != 0, 'resistance_00'].shift(1)
     df['resistance_01'].fillna(inplace=True, method='ffill')
-    df['resistance_02'] = df.loc[df['resistance_01'].diff().fillna(0) != 0, 'resistance_01'].shift(1)
-    df['resistance_02'].fillna(inplace=True, method='ffill')
-    df['resistance_03'] = df.loc[df['resistance_02'].diff().fillna(0) != 0, 'resistance_02'].shift(1)
-    df['resistance_03'].fillna(inplace=True, method='ffill')
-    df['resistance_04'] = df.loc[df['resistance_03'].diff().fillna(0) != 0, 'resistance_03'].shift(1)
-    df['resistance_04'].fillna(inplace=True, method='ffill')
+    # df['resistance_02'] = df.loc[df['resistance_01'].diff().fillna(0) != 0, 'resistance_01'].shift(1)
+    # df['resistance_02'].fillna(inplace=True, method='ffill')
+    # df['resistance_03'] = df.loc[df['resistance_02'].diff().fillna(0) != 0, 'resistance_02'].shift(1)
+    # df['resistance_03'].fillna(inplace=True, method='ffill')
+    # df['resistance_04'] = df.loc[df['resistance_03'].diff().fillna(0) != 0, 'resistance_03'].shift(1)
+    # df['resistance_04'].fillna(inplace=True, method='ffill')
 
     df.loc[df['c'] > df['d'], 'support_00'] = df['d']
     df['support_00'].fillna(inplace=True, method='ffill')
     df['support_01'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_00'].shift(1)
     df['support_01'].fillna(inplace=True, method='ffill')
-    df['support_02'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_01'].shift(1)
-    df['support_02'].fillna(inplace=True, method='ffill')
-    df['support_03'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_02'].shift(1)
-    df['support_03'].fillna(inplace=True, method='ffill')
-    df['support_04'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_03'].shift(1)
-    df['support_04'].fillna(inplace=True, method='ffill')
+    # df['support_02'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_01'].shift(1)
+    # df['support_02'].fillna(inplace=True, method='ffill')
+    # df['support_03'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_02'].shift(1)
+    # df['support_03'].fillna(inplace=True, method='ffill')
+    # df['support_04'] = df.loc[df['support_00'].diff().fillna(0) != 0, 'support_03'].shift(1)
+    # df['support_04'].fillna(inplace=True, method='ffill')
 
 
     # Ranking system
@@ -242,17 +290,17 @@ def calc_strategy(df_data):
 
     df['avg_vol'] = ta.SMA(df, price='volume', timeperiod=timeperiod)
 
-    df['pct_change'] = df['close'].pct_change()
-    df['rolling_std'] = df['close'].rolling(100).std()
-    df['close+2std'] = df['close'] + 2 * df['rolling_std']
-    df['close-2std'] = df['close'] - 2 * df['rolling_std']
+    # df['pct_change'] = df['close'].pct_change()
+    # df['rolling_std'] = df['close'].rolling(100).std()
+    # df['close+2std'] = df['close'] + 2 * df['rolling_std']
+    # df['close-2std'] = df['close'] - 2 * df['rolling_std']
 
     df.loc[(df['close'] < df['open']) & (df['volume'] > df['avg_vol']), 'vol_points'] = -a
     df.loc[(df['close'] > df['open']) & (df['volume'] > df['avg_vol']), 'vol_points'] = a
     df['vol_points'].fillna(0, inplace=True)
 
     max_prob = 4 * a
-    df['points'] = df['ma_points'].astype(float) + df['candle'] + df['stochastic'] + df['vol_points']
+    df['points'] = df['ma_points'].astype(float) + candle + df['stochastic'] + df['vol_points']
     df['prob'] = ((df['points'] + max_prob) * 100 / (2 * max_prob)).fillna(method='ffill')
 
     df['prob_ema'] = df['prob'].ewm(span=5).mean()
