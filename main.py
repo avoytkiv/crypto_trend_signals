@@ -5,6 +5,7 @@ import time
 import pandas as pd
 import math
 import traceback
+from emoji import emojize
 
 import sqlite3
 
@@ -21,13 +22,18 @@ period = 15
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT']
 
 d = [{'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
-     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'en'},
-     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'en'},
+     {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
+     {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
      {'channel_name': 'Криптоисследование 2.0', 'channel_id': '-1001482165395', 'lang': 'ru'},
      {'channel_name': 'Investigación criptográfica 2.0', 'channel_id': '-1001237960088', 'lang': 'es'},
-     {'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'en'}]
+     {'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'eng'},
+     {'channel_name': 'Stormgain', 'channel_id': '-1001208185244', 'lang': 'ru'},
+     {'channel_name': 'Stormgain', 'channel_id': '-1001108189618', 'lang': 'es'}]
 
-icid_link = lambda coin: 'https://app.stormgain.com/deeplink.html?mobile=instrument/instruments/{0}&desktop=%23modal_newInvest_{0}&icid=academy_sgcrypto_eng_telegram'.format(coin)
+icid_link = lambda coin, lang: 'https://app.stormgain.com/deeplink.html?mobile=instrument/instruments/{0}&desktop=%23modal_newInvest_{0}&icid=academy_sgcrypto_{1}_telegram'.format(coin, lang)
+
+open_emoji = emojize(":rotating_light:", use_aliases=True)
+close_emoji = emojize(":bell:", use_aliases=True)
 
 
 class Database:
@@ -205,26 +211,38 @@ class Strategy:
                 if row['signal'] != 'Close':
                     logger.info('{} signal in {}'.format(row['signal'], coin))
                     # Messages
-                    msg_en = '{} #{} at {}\nThis position is only 3% of our capital.\n' \
-                              'Please, control your risk!'.format(row['signal'], coin, row['close'])
-                    msg_ru = '{} #{} по {}\nВ эту позицию мы вложили только 3% нашего капитала.\n' \
+                    msg_en = '{} *{}* #{} at {}\nThis position is only 3% of our capital.\n' \
+                              'Please, control your risk!'.format(open_emoji, row['signal'], coin, row['close'])
+                    msg_ru = '{} *{}* #{} по {}\nВ эту позицию мы вложили только 3% нашего капитала.\n' \
                              'Пожалуйста, контролируйте свой риск!'.format(
-                        'Купить' if row['signal'] == 'Long' else 'Продать', coin, row['close'])
-                    msg_es = '{} #{} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
+                        open_emoji, 'Купить' if row['signal'] == 'Long' else 'Продать', coin, row['close'])
+                    msg_es = '{} *{}* #{} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
                              '¡Por favor controle su riesgo!'.format(
-                        'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
-                    msg_en_stormgain = '{} #{} at {}\nThis position is only 3% of our capital.\n\n[Please, press the link to open terminal]({})'.format(row['signal'], coin, row['close'], icid_link(coin))
+                        open_emoji, 'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
+                    msg_en_stormgain = '{} *{}* #{} at {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'eng'))
+                    msg_ru_stormgain = '{} *{}* #{} по {}\nВ эту позицию мы вложили только 3% нашего капитала.\n\[Перейти в терминал Stormgain]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'ru'))
+                    msg_es_stormgain = '{} *{}* #{} at {}\nHemos invertido solo 3% de nuestro capital en esta posición.\n[Ir a la terminal Stormgain]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'es'))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru)
-                        elif dic['lang'] == 'en':
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                        elif dic['lang'] == 'eng':
                             if dic['channel_name'] == 'Stormgain':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
                             else:
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en)
-                        else:
-                            send_post_to_telegram('Message', dic['channel_id'], msg_es)
+                        elif dic['lang'] == 'es':
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es)
+
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
                                                                     time=df.index[-1],
@@ -234,21 +252,32 @@ class Strategy:
                 else:
                     logger.info('Close signal in {}'.format(coin))
                     # Messages
-                    msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
-                    msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
-                    msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(coin, row['close'], pct_chg)
-                    msg_en_stormgain = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n\n[Please, press the link to open terminal]({})'.format(coin, row['close'], pct_chg, icid_link(coin))
+                    msg_en = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(close_emoji, coin, row['close'], pct_chg)
+                    msg_ru = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(close_emoji, coin, row['close'], pct_chg)
+                    msg_es = '{} Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(close_emoji, coin, row['close'], pct_chg)
+                    msg_en_stormgain = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'eng'))
+                    msg_ru_stormgain = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал Stormgain]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'ru'))
+                    msg_es_stormgain = '{} Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!\n[Ir a la terminal Stormgain]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'es'))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru)
-                        elif dic['lang'] == 'en':
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                        elif dic['lang'] == 'eng':
                             if dic['channel_name'] == 'Stormgain':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
                             else:
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en)
-                        else:
-                            send_post_to_telegram('Message', dic['channel_id'], msg_es)
+                        elif dic['lang'] == 'es':
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
                                                                     time=df.index[-1],
@@ -271,22 +300,35 @@ class Strategy:
 
                     logger.info('Stop loss signal in {}'.format(coin))
                     # Messages
-                    msg_en = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(coin, row['close'], pct_chg)
-                    msg_ru = 'Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(coin, row['close'], pct_chg)
-                    msg_es = 'Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(coin,row['close'], pct_chg)
-                    msg_en_stormgain = 'Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n\n[Please, press the link to open terminal]({})'.format(
-                        coin, row['close'], pct_chg, icid_link(coin))
+                    msg_en = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!'.format(
+                        close_emoji, coin, row['close'], pct_chg)
+                    msg_ru = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!'.format(
+                        close_emoji, coin, row['close'], pct_chg)
+                    msg_es = '{} Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!'.format(
+                        close_emoji, coin, row['close'], pct_chg)
+                    msg_en_stormgain = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'eng'))
+                    msg_ru_stormgain = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал Stormgain]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'ru'))
+                    msg_es_stormgain = '{} Posición cerrada en #{} por {}\nPorcentaje de cambio desde el punto de entrada: {}%\n¡Pasemos al próximo buen comercio!\n[Ir a la terminal Stormgain]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'es'))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru)
-                        elif dic['lang'] == 'en':
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                        elif dic['lang'] == 'eng':
                             if dic['channel_name'] == 'Stormgain':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
                             else:
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en)
-                        else:
-                            send_post_to_telegram('Message', dic['channel_id'], msg_es)
+                        elif dic['lang'] == 'es':
+                            if dic['channel_name'] == 'Stormgain':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
+                            else:
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es)
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
                                                                     time=df.index[-1],
