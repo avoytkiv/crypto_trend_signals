@@ -221,7 +221,7 @@ class Strategy:
                         open_emoji, 'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
                     msg_en_stormgain = '{} *{}* #{} at {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
                         open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'eng'))
-                    msg_ru_stormgain = '{} *{}* #{} по {}\nВ эту позицию мы вложили только 3% нашего капитала.\n\[Перейти в терминал Stormgain]({})'.format(
+                    msg_ru_stormgain = '{} *{}* #{} по {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал Stormgain]({})'.format(
                         open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'ru'))
                     msg_es_stormgain = '{} *{}* #{} at {}\nHemos invertido solo 3% de nuestro capital en esta posición.\n[Ir a la terminal Stormgain]({})'.format(
                         open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'es'))
