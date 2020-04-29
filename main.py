@@ -192,6 +192,10 @@ class Strategy:
                 (last_trade_price - row['close']) * 100 / last_trade_price if last_trade_direction == 'Short' else 0
             pct_chg = round(pct_chg, 2)
 
+            # Stop loss
+            digits = str(last_trade_price)[::-1].find('.')
+            stop_loss_price = round(0.97 * last_trade_price, digits) if last_trade_direction == 'Long' else round(1.03 * last_trade_price, digits) if last_trade_direction == 'Short' else 0
+
             # current_position
             if (row['signal'] == 'Long' and last_trade_direction != 'Long') \
                     or (row['signal'] == 'Short' and last_trade_direction != 'Short') \
@@ -219,12 +223,12 @@ class Strategy:
                     msg_es = '{} *{}* #{} por {}\nHemos invertido solo 3%-5% de nuestro capital en esta posición.\n' \
                              '¡Por favor controle su riesgo!'.format(
                         open_emoji, 'Comprar' if row['signal'] == 'Long' else 'Vender', coin, row['close'])
-                    msg_en_stormgain = '{} *{}* #{} at {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
-                        open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'eng'))
-                    msg_ru_stormgain = '{} *{}* #{} по {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал Stormgain]({})'.format(
-                        open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'ru'))
-                    msg_es_stormgain = '{} *{}* #{} at {}\nHemos invertido solo 3% de nuestro capital en esta posición.\n[Ir a la terminal Stormgain]({})'.format(
-                        open_emoji, row['signal'], coin, row['close'], icid_link(coin, 'es'))
+                    msg_en_stormgain = '{} *{}* #{} at {}\nStop loss: {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'eng'))
+                    msg_ru_stormgain = '{} *{}* #{} по {}\nСтоп лосс: {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал Stormgain]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'ru'))
+                    msg_es_stormgain = '{} *{}* #{} at {}\nStop loss: {}\nHemos invertido solo 3% de nuestro capital en esta posición.\n[Ir a la terminal Stormgain]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'es'))
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
