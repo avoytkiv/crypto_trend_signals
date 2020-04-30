@@ -192,9 +192,6 @@ class Strategy:
                 (last_trade_price - row['close']) * 100 / last_trade_price if last_trade_direction == 'Short' else 0
             pct_chg = round(pct_chg, 2)
 
-            # Stop loss
-            digits = str(last_trade_price)[::-1].find('.')
-            stop_loss_price = round(0.97 * last_trade_price, digits) if last_trade_direction == 'Long' else round(1.03 * last_trade_price, digits) if last_trade_direction == 'Short' else 0
 
             # current_position
             if (row['signal'] == 'Long' and last_trade_direction != 'Long') \
@@ -214,6 +211,10 @@ class Strategy:
                 # Long/Short signal
                 if row['signal'] != 'Close':
                     logger.info('{} signal in {}'.format(row['signal'], coin))
+                    # Stop loss price for message only
+                    digits = str(row['close'])[::-1].find('.')
+                    stop_loss_price = round(0.97 * row['close'], digits) if row['signal'] == 'Long' else round(
+                        1.03 * row['close'], digits) if row['signal'] == 'Short' else 0
                     # Messages
                     msg_en = '{} *{}* #{} at {}\nThis position is only 3% of our capital.\n' \
                               'Please, control your risk!'.format(open_emoji, row['signal'], coin, row['close'])
