@@ -366,12 +366,6 @@ class Strategy:
             if df.empty:
                 logger.info('No signals in {}'.format(coin))
                 continue
-            if df['direction'].iloc[-1] != 'Close':
-                logger.info('Retrieve prices')
-                current_coin = get_all_binance(coin, '{}m'.format(period), get_historical_start_date(1))
-                df = df.append(pd.DataFrame(
-                    [[coin, current_coin['timestamp'].iloc[-1] * 1000, current_coin['close'].iloc[-1], 'Close']],
-                    columns=df.columns))
 
             df['price_shift'] = df['price'].shift(1)
             df['direction_shift'] = df['direction'].shift(1)
