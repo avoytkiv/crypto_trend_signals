@@ -35,6 +35,7 @@ icid_link = lambda coin, lang: 'https://app.stormgain.com/deeplink.html?mobile=i
 
 open_emoji = emojize(":rotating_light:", use_aliases=True)
 close_emoji = emojize(":bell:", use_aliases=True)
+new_high_emoji = emojize(":tada:", use_aliases=True)
 
 
 class Database:
@@ -355,6 +356,62 @@ class Strategy:
                         logger.info('Message posted in {}'.format(dic['channel_name']))
 
                 continue
+
+        logger.info('Check database for stats')
+        all_dfs = pd.DataFrame()
+        for coin in coins:
+            all_trades = self.__db.fetch_all(coin)
+            df = pd.DataFrame(all_trades, columns=['symbol', 'timestamp', 'price', 'direction'])
+
+            if df.empty:
+                logger.info('No signals in {}'.format(coin))
+                continue
+            if df['direction'].iloc[-1] != 'Close':
+                logger.info('Retrieve prices')
+                current_coin = get_all_binance(coin, '{}m'.format(period), get_historical_start_date(1))
+                df = df.append(pd.DataFrame(
+                    [[coin, current_coin['timestamp'].iloc[-1] * 1000, current_coin['close'].iloc[-1], 'Close']],
+                    columns=df.columns))
+
+            df['price_shift'] = df['price'].shift(1)
+            df['direction_shift'] = df['direction'].shift(1)
+            # Difference between previous signal price and current signal price
+            df['diff'] = (df['price'] - df['price_shift']) / df['price_shift']
+            # Count short positions to opposite value and if first signal after close then zero pnl
+            df['diff'] = df.apply(
+                lambda row: -1 * row['diff'] if row['direction_shift'] == 'Short' else row['diff'], axis=1)
+            df['diff'] = df.apply(lambda row: 0 if row['direction_shift'] == 'Close' else row['diff'], axis=1)
+
+            df = df.dropna()
+
+            all_dfs = pd.concat([all_dfs, df])
+
+        all_dfs.reset_index()
+        all_dfs['timeindex'] = pd.to_datetime(all_dfs['timestamp'], unit='ms')
+        all_dfs.set_index('timeindex', inplace=True)
+
+        # Seasonality
+        all_dfs = all_dfs[all_dfs.index >= '2019-09-18 19:30:00']
+
+        group_df = all_dfs.resample('M').sum()
+
+        current_year= group_df.index[-1].year
+        current_month = group_df.index[-1].month
+        key = str(current_year) + ',' + str(current_month)
+        monthly_return = group_df['diff'].iloc[-1] * 100
+        logger.info('Monthly return: {}'.format(monthly_return))
+
+        from collections import defaultdict
+        monthly_highs = defaultdict(int)
+
+        if monthly_return > monthly_highs[key]:
+            # send message
+            send_post_to_telegram('Message', '@libertex_crypto', '{} New monthly high'.format(new_high_emoji))
+
+            # assign new value for the key
+            monthly_highs[key] = monthly_return
+
+        logger.info('Monthly high: {}'.format(monthly_highs[key]))
 
 
 if __name__ == '__main__':
