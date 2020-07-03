@@ -12,6 +12,9 @@ import sqlite3
 from get_binance import get_all_binance
 from tools import send_post_to_telegram, visualize_candlestick, get_historical_start_date
 from trend import calc_strategy
+from collections import defaultdict
+import matplotlib.pyplot as plt
+import numpy as np
 
 logging.basicConfig(format='%(asctime)-15s [%(levelname)s]: %(message)s', level=logging.INFO)
 logger = logging.getLogger('main')
@@ -36,6 +39,8 @@ icid_link = lambda coin, lang: 'https://app.stormgain.com/deeplink.html?mobile=i
 open_emoji = emojize(":rotating_light:", use_aliases=True)
 close_emoji = emojize(":bell:", use_aliases=True)
 new_high_emoji = emojize(":tada:", use_aliases=True)
+
+monthly_highs = defaultdict(int)
 
 
 class Database:
@@ -386,6 +391,8 @@ class Strategy:
 
         # Seasonality
         all_dfs = all_dfs[all_dfs.index >= '2019-09-18 19:30:00']
+        all_dfs['year'] = all_dfs.index.map(lambda row: row.year)
+        all_dfs['month'] = all_dfs.index.map(lambda row: row.month)
 
         group_df = all_dfs.resample('M').sum()
 
@@ -395,12 +402,21 @@ class Strategy:
         monthly_return = group_df['diff'].iloc[-1] * 100
         logger.info('Monthly return: {}'.format(monthly_return))
 
-        from collections import defaultdict
-        monthly_highs = defaultdict(int)
 
         if monthly_return > monthly_highs[key]:
+            group_daily = all_dfs.groupby(['year', 'month'])['diff'].sum()
+            id_array = np.arange(0, len(group_daily))
+            fig, ax = plt.figure()
+            ax = group_daily.plot.bar()
+            ax.hlines(0, id_array[0], id_array[-1], linestyles='dashed', alpha=0.3)
+            plt.tight_layout()
+            figure_name = 'new_monthly_high.png'
+            plt.savefig(figure_name)
+            # close it so it never gets displayed
+            plt.close(fig)
             # send message
-            send_post_to_telegram('Message', '@libertex_crypto', '{} New monthly high'.format(new_high_emoji))
+            send_post_to_telegram('Message', '@libertex_crypto', '{} New monthly high: {}'.format(new_high_emoji, monthly_return))
+            send_post_to_telegram('Photo', '@libertex_crypto', figure_name)
 
             # assign new value for the key
             monthly_highs[key] = monthly_return
