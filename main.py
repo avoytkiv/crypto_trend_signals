@@ -399,7 +399,7 @@ class Strategy:
         current_year= group_df.index[-1].year
         current_month = group_df.index[-1].month
         key = str(current_year) + ',' + str(current_month)
-        monthly_return = group_df['diff'].iloc[-1] * 100
+        monthly_return = np.round(group_df['diff'].iloc[-1] * 100, 2)
         logger.info('Monthly return: {}'.format(monthly_return))
 
 
@@ -414,9 +414,22 @@ class Strategy:
             plt.savefig(figure_name)
             plt.show(block=False)
             plt.close(fig)
-            # send message
-            send_post_to_telegram('Message', '@libertex_crypto', '{} New monthly high: {}'.format(new_high_emoji, monthly_return))
-            send_post_to_telegram('Photo', '@libertex_crypto', figure_name)
+            # Messages
+            msg_en = '{} New monthly high: {}%'.format(new_high_emoji, monthly_return)
+            msg_ru = '{} Новый месячный максимум: {}%'.format(new_high_emoji, monthly_return)
+            msg_es = '{} Nuevo máximo mensual: {}%'.format(new_high_emoji, monthly_return)
+            msg_tr = '{} Yeni aylık en yüksek: %{}'.format(new_high_emoji, monthly_return)
+            # Send messages to channels
+            for dic in d:
+                if dic['lang'] == 'ru':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                elif dic['lang'] == 'eng':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_en)
+                elif dic['lang'] == 'es':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_es)
+                elif dic['lang'] == 'tr':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_tr)
+                send_post_to_telegram('Photo', dic['channel_id'], figure_name)
 
             # assign new value for the key
             monthly_highs[key] = monthly_return
