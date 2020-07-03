@@ -406,13 +406,13 @@ class Strategy:
         if monthly_return > monthly_highs[key]:
             group_daily = all_dfs.groupby(['year', 'month'])['diff'].sum()
             id_array = np.arange(0, len(group_daily))
-            fig, ax = plt.figure()
+            figure_name = 'new_monthly_high.png'
             ax = group_daily.plot.bar()
             ax.hlines(0, id_array[0], id_array[-1], linestyles='dashed', alpha=0.3)
+            fig = ax.get_figure()
             plt.tight_layout()
-            figure_name = 'new_monthly_high.png'
             plt.savefig(figure_name)
-            # close it so it never gets displayed
+            plt.show(block=False)
             plt.close(fig)
             # send message
             send_post_to_telegram('Message', '@libertex_crypto', '{} New monthly high: {}'.format(new_high_emoji, monthly_return))
