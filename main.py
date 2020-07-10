@@ -375,7 +375,7 @@ class Strategy:
             df['price_shift'] = df['price'].shift(1)
             df['direction_shift'] = df['direction'].shift(1)
             # Difference between previous signal price and current signal price
-            df['diff'] = (df['price'] - df['price_shift']) / df['price_shift']
+            df['diff'] = (df['price'] - df['price_shift']) * 100 / df['price_shift']
             # Count short positions to opposite value and if first signal after close then zero pnl
             df['diff'] = df.apply(
                 lambda row: -1 * row['diff'] if row['direction_shift'] == 'Short' else row['diff'], axis=1)
@@ -399,15 +399,14 @@ class Strategy:
         current_year= group_df.index[-1].year
         current_month = group_df.index[-1].month
         key = str(current_year) + ',' + str(current_month)
-        monthly_return = np.round(group_df['diff'].iloc[-1] * 100, 2)
-        logger.info('Monthly return: {}'.format(monthly_return))
-
+        monthly_return = np.round(group_df['diff'].iloc[-1], 2)
 
         if monthly_return > monthly_highs[key]:
             group_daily = all_dfs.groupby(['year', 'month'])['diff'].sum()
             id_array = np.arange(0, len(group_daily))
             figure_name = 'new_monthly_high.png'
             ax = group_daily.plot.bar()
+            ax.set_ylabel('percentage, %')
             ax.hlines(0, id_array[0], id_array[-1], linestyles='dashed', alpha=0.3)
             fig = ax.get_figure()
             plt.tight_layout()
@@ -430,6 +429,7 @@ class Strategy:
                 elif dic['lang'] == 'tr':
                     send_post_to_telegram('Message', dic['channel_id'], msg_tr)
                 send_post_to_telegram('Photo', dic['channel_id'], figure_name)
+                logger.info('Message posted in {}'.format(dic['channel_name']))
 
             # assign new value for the key
             monthly_highs[key] = monthly_return
