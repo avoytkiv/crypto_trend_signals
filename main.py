@@ -22,7 +22,8 @@ logger = logging.getLogger('main')
 data_dir = os.environ.get('DATA_PATH', '.')
 
 period = 15
-coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'EOSUSDT', 'ADAUSDT']
+coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT']
+# coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'ETHBTC', 'LTCBTC', 'BCHBTC', 'DASHBTC']
 
 # {'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
 # {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
