@@ -23,6 +23,7 @@ data_dir = os.environ.get('DATA_PATH', '.')
 
 period = 15
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT']
+all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT', 'EOSUSDT', 'XRPUSDT']
 # coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'ETHBTC', 'LTCBTC', 'BCHBTC', 'DASHBTC']
 
 # {'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
@@ -368,7 +369,7 @@ class Strategy:
 
         logger.info('Check database for stats')
         all_dfs = pd.DataFrame()
-        for coin in coins:
+        for coin in all_coins:
             all_trades = self.__db.fetch_all(coin)
             df = pd.DataFrame(all_trades, columns=['symbol', 'timestamp', 'price', 'direction'])
 
