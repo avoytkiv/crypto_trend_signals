@@ -186,19 +186,22 @@ class Strategy:
         logger.info('Retrieve prices')
 
         for coin in coins:
-            last_trade = self.__db.fetch_last_trade(coin)
-            last_trade_direction = last_trade.get('direction')
-            last_trade_price = last_trade.get('price')
-
             # Get data and calculate strategy
             df_data = get_all_binance(coin, '{}m'.format(period), start_date=get_historical_start_date(5))
             df = calc_strategy(df_data)
             row = df.iloc[-1]
 
-            # Change
-            pct_chg = (row['close'] - last_trade_price) * 100 / last_trade_price if last_trade_direction == 'Long' else \
-                (last_trade_price - row['close']) * 100 / last_trade_price if last_trade_direction == 'Short' else 0
-            pct_chg = round(pct_chg, 2)
+            last_trade = self.__db.fetch_last_trade(coin)
+            if last_trade is not None:
+                last_trade_direction = last_trade.get('direction')
+                last_trade_price = last_trade.get('price')
+                # Change
+                pct_chg = (row['close'] - last_trade_price) * 100 / last_trade_price if last_trade_direction == 'Long' else \
+                    (last_trade_price - row['close']) * 100 / last_trade_price if last_trade_direction == 'Short' else 0
+                pct_chg = round(pct_chg, 2)
+            else:
+                last_trade_direction = 'Close'
+                pct_chg = 0
 
 
             # current_position
