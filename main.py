@@ -370,10 +370,10 @@ class Strategy:
             plt.show(block=False)
             plt.close(fig)
             # Messages
-            msg_en = '{} New monthly high: {}%'.format(new_high_emoji, 100 * round(last_month_current, 2))
-            msg_ru = '{} Новый месячный максимум: {}%'.format(new_high_emoji, 100 * round(last_month_current, 2))
-            msg_es = '{} Nuevo máximo mensual: {}%'.format(new_high_emoji, 100 * round(last_month_current, 2))
-            msg_tr = '{} Yeni aylık en yüksek: %{}'.format(new_high_emoji, 100 * round(last_month_current, 2))
+            msg_en = '{} New monthly high: {}%'.format(new_high_emoji, round(last_month_current, 2))
+            msg_ru = '{} Новый месячный максимум: {}%'.format(new_high_emoji, round(last_month_current, 2))
+            msg_es = '{} Nuevo máximo mensual: {}%'.format(new_high_emoji, round(last_month_current, 2))
+            msg_tr = '{} Yeni aylık en yüksek: %{}'.format(new_high_emoji, round(last_month_current, 2))
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
