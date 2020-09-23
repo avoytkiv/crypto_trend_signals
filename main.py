@@ -22,9 +22,12 @@ logger = logging.getLogger('main')
 data_dir = os.environ.get('DATA_PATH', '.')
 
 period = 15
+# telegram
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT']
 all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT', 'EOSUSDT', 'XRPUSDT']
+# storm
 # coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'ETHBTC', 'LTCBTC', 'BCHBTC', 'DASHBTC']
+# all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'ETHBTC', 'LTCBTC', 'BCHBTC', 'DASHBTC']
 
 # {'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
 # {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
@@ -40,6 +43,7 @@ open_emoji = emojize(":rotating_light:", use_aliases=True)
 close_emoji = emojize(":bell:", use_aliases=True)
 new_high_emoji = emojize(":tada:", use_aliases=True)
 
+monthly_highs = defaultdict(int)
 
 class Database:
     def __init__(self, datadir: str):
@@ -353,11 +357,14 @@ class Strategy:
         all_dfs['year'] = all_dfs.index.map(lambda row: row.year)
         all_dfs['month'] = all_dfs.index.map(lambda row: row.month)
 
-        group_df = all_dfs['diff'].groupby(pd.Grouper(freq='1M')).cumsum()
-        last_month_high = group_df.resample('1M').max().iloc[-1]
-        last_month_current = group_df.resample('1M').last().iloc[-1]
+        group_df = all_dfs.resample('M').sum()
 
-        if last_month_current == last_month_high and last_month_high > 0:
+        current_year= group_df.index[-1].year
+        current_month = group_df.index[-1].month
+        key = str(current_year) + ',' + str(current_month)
+        monthly_return = np.round(group_df['diff'].iloc[-1], 2)
+
+        if monthly_return > monthly_highs[key]:
             group_daily = all_dfs.groupby(['year', 'month'])['diff'].sum()
             id_array = np.arange(0, len(group_daily))
             figure_name = 'new_monthly_high.png'
@@ -370,10 +377,11 @@ class Strategy:
             plt.show(block=False)
             plt.close(fig)
             # Messages
-            msg_en = '{} New monthly high: {}%'.format(new_high_emoji, round(last_month_current, 2))
-            msg_ru = '{} Новый месячный максимум: {}%'.format(new_high_emoji, round(last_month_current, 2))
-            msg_es = '{} Nuevo máximo mensual: {}%'.format(new_high_emoji, round(last_month_current, 2))
-            msg_tr = '{} Yeni aylık en yüksek: %{}'.format(new_high_emoji, round(last_month_current, 2))
+            msg_en = '{} New monthly high: {}%'.format(new_high_emoji, monthly_return)
+            msg_ru = '{} Новый месячный максимум: {}%'.format(new_high_emoji, monthly_return)
+            msg_es = '{} Nuevo máximo mensual: {}%'.format(new_high_emoji, monthly_return)
+            msg_tr = '{} Yeni aylık en yüksek: %{}'.format(new_high_emoji, monthly_return)
+
             # Send messages to channels
             for dic in d:
                 if dic['lang'] == 'ru':
@@ -387,9 +395,10 @@ class Strategy:
                 send_post_to_telegram('Photo', dic['channel_id'], figure_name)
                 logger.info('Message posted in {}'.format(dic['channel_name']))
 
+            # assign new value for the key
+            monthly_highs[key] = monthly_return
 
-
-        logger.info('Monthly high: {}, Current cum monthly return: {}'.format(last_month_high, last_month_current))
+        logger.info('Monthly high: {}'.format(monthly_highs[key]))
 
 
 if __name__ == '__main__':
