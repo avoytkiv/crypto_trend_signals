@@ -35,9 +35,11 @@ all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT', 
 d = [{'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'eng'},
      {'channel_name': 'Stormgain', 'channel_id': '-1001208185244', 'lang': 'ru'},
      {'channel_name': 'Stormgain', 'channel_id': '-1001108189618', 'lang': 'es'},
-     {'channel_name': 'Stormgain', 'channel_id': '-1001414652913', 'lang': 'tr'}]
+     {'channel_name': 'Stormgain', 'channel_id': '-1001414652913', 'lang': 'tr'},
+     {'channel_name': 'Maximarkets', 'channel_id': '-1001487504229', 'lang': 'maxi'}]
 
 icid_link = lambda coin, lang: 'https://app.stormgain.com/deeplink.html?mobile=instrument/instruments/{0}&desktop=%23modal_newInvest_{0}&icid=academy_sgcrypto_{1}_telegram'.format(coin, lang)
+maximarkets_link = 'https://maximarkets.org/registration/'
 
 open_emoji = emojize(":rotating_light:", use_aliases=True)
 close_emoji = emojize(":bell:", use_aliases=True)
@@ -237,6 +239,8 @@ class Strategy:
                         open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'es'))
                     msg_tr_stormgain = '{} *{}* #{} at {}\nStop loss: {}\nBu pozisyon sermayemizin sadece% 3ü\n[Terminali açmak için lütfen bağlantıya basın]({})'.format(
                         open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'tr'))
+                    msg_ru_maxi = '{} *{}* #{} по {}\nСтоп лосс: {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал MaxiMarkets]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], stop_loss_price, maximarkets_link)
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
@@ -247,6 +251,8 @@ class Strategy:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
                         elif dic['lang'] == 'tr':
                             send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
+                        elif dic['lang'] == 'maxi':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_maxi)
 
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
@@ -265,6 +271,8 @@ class Strategy:
                         close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'es'))
                     msg_tr_stormgain = "{} {}'de #{}'i kapatın\nGiriş fiyatından yüzde değişim: %{}\nBir sonraki İyi ticarete geçelim!\n[Terminali açmak için lütfen bağlantıya basın]({})".format(
                         close_emoji, row['close'], coin, pct_chg, icid_link(coin, 'tr'))
+                    msg_ru_maxi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал MaxiMarkets]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, maximarkets_link)
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
@@ -275,6 +283,8 @@ class Strategy:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
                         elif dic['lang'] == 'tr':
                             send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
+                        elif dic['lang'] == 'maxi':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_maxi)
 
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
@@ -306,6 +316,8 @@ class Strategy:
                         close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'es'))
                     msg_tr_stormgain = "{} {}'de #{}'i kapatın\nGiriş fiyatından yüzde değişim: %{}\nBir sonraki İyi ticarete geçelim!\n[Terminali açmak için lütfen bağlantıya basın]({})".format(
                         close_emoji, row['close'], coin, pct_chg, icid_link(coin, 'tr'))
+                    msg_ru_maxi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал MaxiMarkets]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, maximarkets_link)
                     # Send messages to channels
                     for dic in d:
                         if dic['lang'] == 'ru':
@@ -316,6 +328,8 @@ class Strategy:
                             send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
                         elif dic['lang'] == 'tr':
                             send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
+                        elif dic['lang'] == 'maxi':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_maxi)
 
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
@@ -392,6 +406,8 @@ class Strategy:
                     send_post_to_telegram('Message', dic['channel_id'], msg_es)
                 elif dic['lang'] == 'tr':
                     send_post_to_telegram('Message', dic['channel_id'], msg_tr)
+                elif dic['lang'] == 'maxi':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
                 send_post_to_telegram('Photo', dic['channel_id'], figure_name)
                 logger.info('Message posted in {}'.format(dic['channel_name']))
 
