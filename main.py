@@ -24,7 +24,13 @@ data_dir = os.environ.get('DATA_PATH', '.')
 period = 15
 # telegram
 coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT']
-all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT', 'EOSUSDT', 'XRPUSDT']
+all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT', 'EOSUSDT']
+libertex_coins = {'BTCUSDT': 'Bitcoin',
+                  'ETHUSDT': 'ETHUSD',
+                  'XRPUSDT': 'XRPUSD',
+                  'LINKUSDT': 'LNKUSD',
+                  'ADAUSDT': 'ADAUSD',
+                  'TRXUSDT': 'TRXUSD'}
 # storm
 # coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'ETHBTC', 'LTCBTC', 'BCHBTC', 'DASHBTC']
 # all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LTCUSDT', 'BCHUSDT', 'ETHBTC', 'LTCBTC', 'BCHBTC', 'DASHBTC']
@@ -32,14 +38,22 @@ all_coins = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'LINKUSDT', 'ADAUSDT', 'TRXUSDT', 
 # {'channel_name': 'TradingRoom_VIP channel', 'channel_id': '-1001407228571', 'lang': 'ru'},
 # {'channel_name': 'VIP Signal P&C', 'channel_id': '-1001412423063', 'lang': 'eng'},
 # {'channel_name': 'Crypto Libertex', 'channel_id': '@libertex_crypto', 'lang': 'eng'},
-d = [{'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'eng'},
-     {'channel_name': 'Stormgain', 'channel_id': '-1001208185244', 'lang': 'ru'},
-     {'channel_name': 'Stormgain', 'channel_id': '-1001108189618', 'lang': 'es'},
-     {'channel_name': 'Stormgain', 'channel_id': '-1001414652913', 'lang': 'tr'},
-     {'channel_name': 'Maximarkets', 'channel_id': '-1001487504229', 'lang': 'maxi'}]
+d = [{'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'eng', 'source': 'storm'},
+     {'channel_name': 'Stormgain', 'channel_id': '-1001208185244', 'lang': 'ru', 'source': 'storm'},
+     {'channel_name': 'Stormgain', 'channel_id': '-1001108189618', 'lang': 'es', 'source': 'storm'},
+     {'channel_name': 'Stormgain', 'channel_id': '-1001414652913', 'lang': 'tr', 'source': 'storm'},
+     {'channel_name': 'Libertex CryptoResearch 3.0 Europe', 'channel_id': '-1001423335370', 'lang': 'eng', 'source': 'cysec'},
+     {'channel_name': 'CryproResearch 3.0 Signals RU', 'channel_id': '-1001461362070', 'lang': 'ru', 'source': 'bvi'},
+     {'channel_name': 'CryptoResearch 3.0 Signals EN', 'channel_id': '-1001186344499', 'lang': 'eng', 'source': 'bvi'},
+     {'channel_name': 'Crypto3.0 Storm Signals RU', 'channel_id': '-1001378503756', 'lang': 'ru', 'source': 'storm'},
+     {'channel_name': 'Crypto3.0 Storm Signals ES', 'channel_id': '-1001397885499', 'lang': 'es', 'source': 'storm'},
+     {'channel_name': 'Crypto3.0 Storm Signals EN', 'channel_id': '-1001357818917', 'lang': 'eng', 'source': 'storm'},
+     {'channel_name': 'Crypto3.0 Storm Signals TR', 'channel_id': '-1001256354224', 'lang': 'tr', 'source': 'storm'},
+     {'channel_name': 'Crypto3.0 Storm Signals DE', 'channel_id': '-1001131605190', 'lang': 'de', 'source': 'storm'}]
 
 icid_link = lambda coin, lang: 'https://app.stormgain.com/deeplink.html?mobile=instrument/instruments/{0}&desktop=%23modal_newInvest_{0}&icid=academy_sgcrypto_{1}_telegram'.format(coin, lang)
-maximarkets_link = 'https://maximarkets.org/registration/'
+cysec_link = lambda coin: 'https://app.libertex.com/?icid=Research_Crypto3#modal_newInvest_{}'.format(coin)
+bvi_link = lambda coin: 'https://libertex.fxclub.org/?icid=Research_Crypto3#modal_newInvest_{}'.format(coin)
 
 open_emoji = emojize(":rotating_light:", use_aliases=True)
 close_emoji = emojize(":bell:", use_aliases=True)
@@ -239,20 +253,34 @@ class Strategy:
                         open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'es'))
                     msg_tr_stormgain = '{} *{}* #{} at {}\nStop loss: {}\nBu pozisyon sermayemizin sadece% 3ü\n[Terminali açmak için lütfen bağlantıya basın]({})'.format(
                         open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'tr'))
-                    msg_ru_maxi = '{} *{}* #{} по {}\nСтоп лосс: {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал MaxiMarkets]({})'.format(
-                        open_emoji, row['signal'], coin, row['close'], stop_loss_price, maximarkets_link)
+                    msg_de_stormgain = '{} *{}* #{} at {}\nStop loss: {}\nDiese Position beträgt nur 3% unseres Kapitals.\n[Bitte klicken Sie auf den Link, um das Terminal zu öffnen]({})'.format(
+                        open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'de'))
+                    msg_en_bvi = '{} *{}* #{} at {}\nStop loss: {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
+                        open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, bvi_link(libertex_coins[coin]))
+                    msg_ru_bvi = '{} *{}* #{} по {}\nСтоп лосс: {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал Stormgain]({})'.format(
+                        open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, bvi_link(libertex_coins[coin]))
+                    msg_en_cysec = '{} *{}* #{} at {}\nStop loss: {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
+                        open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, cysec_link(libertex_coins[coin]))
                     # Send messages to channels
                     for dic in d:
-                        if dic['lang'] == 'ru':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
-                        elif dic['lang'] == 'eng':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
-                        elif dic['lang'] == 'es':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
-                        elif dic['lang'] == 'tr':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
-                        elif dic['lang'] == 'maxi':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_maxi)
+                        if dic['source'] == 'storm':
+                            if dic['lang'] == 'ru':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
+                            elif dic['lang'] == 'eng':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
+                            elif dic['lang'] == 'es':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
+                            elif dic['lang'] == 'tr':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
+                            elif dic['lang'] == 'de':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_de_stormgain)
+                        elif dic['source'] == 'bvi':
+                            if dic['lang'] == 'ru':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_bvi)
+                            elif dic['lang'] == 'eng':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_bvi)
+                        elif dic['source'] == 'cysec':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_en_cysec)
 
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
@@ -271,20 +299,35 @@ class Strategy:
                         close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'es'))
                     msg_tr_stormgain = "{} {}'de #{}'i kapatın\nGiriş fiyatından yüzde değişim: %{}\nBir sonraki İyi ticarete geçelim!\n[Terminali açmak için lütfen bağlantıya basın]({})".format(
                         close_emoji, row['close'], coin, pct_chg, icid_link(coin, 'tr'))
-                    msg_ru_maxi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал MaxiMarkets]({})'.format(
-                        close_emoji, coin, row['close'], pct_chg, maximarkets_link)
+                    msg_de_stormgain = '{} Decken Sie #{} zum Preis von {}\nDie prozentuale Veränderung gegenüber dem Einstiegspreis beträgt: {}%\nFahren wir mit dem nächsten guten Handel fort!\n[Bitte klicken Sie auf den Link, um das Terminal zu öffnen]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'de'))
+                    msg_en_bvi = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
+                    msg_ru_bvi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал Stormgain]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
+                    msg_en_cysec = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, cysec_link(libertex_coins[coin]))
+
                     # Send messages to channels
                     for dic in d:
-                        if dic['lang'] == 'ru':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
-                        elif dic['lang'] == 'eng':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
-                        elif dic['lang'] == 'es':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
-                        elif dic['lang'] == 'tr':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
-                        elif dic['lang'] == 'maxi':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_maxi)
+                        if dic['source'] == 'storm':
+                            if dic['lang'] == 'ru':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
+                            elif dic['lang'] == 'eng':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
+                            elif dic['lang'] == 'es':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
+                            elif dic['lang'] == 'tr':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
+                            elif dic['lang'] == 'de':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_de_stormgain)
+                        elif dic['source'] == 'bvi':
+                            if dic['lang'] == 'ru':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_bvi)
+                            elif dic['lang'] == 'eng':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_bvi)
+                        elif dic['source'] == 'cysec':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_en_cysec)
 
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
@@ -316,20 +359,34 @@ class Strategy:
                         close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'es'))
                     msg_tr_stormgain = "{} {}'de #{}'i kapatın\nGiriş fiyatından yüzde değişim: %{}\nBir sonraki İyi ticarete geçelim!\n[Terminali açmak için lütfen bağlantıya basın]({})".format(
                         close_emoji, row['close'], coin, pct_chg, icid_link(coin, 'tr'))
-                    msg_ru_maxi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал MaxiMarkets]({})'.format(
-                        close_emoji, coin, row['close'], pct_chg, maximarkets_link)
+                    msg_de_stormgain = '{} Decken Sie #{} zum Preis von {}\nDie prozentuale Veränderung gegenüber dem Einstiegspreis beträgt: {}%\nFahren wir mit dem nächsten guten Handel fort!\n[Bitte klicken Sie auf den Link, um das Terminal zu öffnen]({})'.format(
+                        close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'de'))
+                    msg_en_bvi = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
+                    msg_ru_bvi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал Stormgain]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
+                    msg_en_cysec = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, cysec_link(libertex_coins[coin]))
                     # Send messages to channels
                     for dic in d:
-                        if dic['lang'] == 'ru':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
-                        elif dic['lang'] == 'eng':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
-                        elif dic['lang'] == 'es':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
-                        elif dic['lang'] == 'tr':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
-                        elif dic['lang'] == 'maxi':
-                            send_post_to_telegram('Message', dic['channel_id'], msg_ru_maxi)
+                        if dic['source'] == 'storm':
+                            if dic['lang'] == 'ru':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_stormgain)
+                            elif dic['lang'] == 'eng':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_stormgain)
+                            elif dic['lang'] == 'es':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_es_stormgain)
+                            elif dic['lang'] == 'tr':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
+                            elif dic['lang'] == 'de':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_de_stormgain)
+                        elif dic['source'] == 'bvi':
+                            if dic['lang'] == 'ru':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_ru_bvi)
+                            elif dic['lang'] == 'eng':
+                                send_post_to_telegram('Message', dic['channel_id'], msg_en_bvi)
+                        elif dic['source'] == 'cysec':
+                            send_post_to_telegram('Message', dic['channel_id'], msg_en_cysec)
 
                         send_post_to_telegram('Photo', dic['channel_id'],
                                               visualize_candlestick(df=df, symbol=coin, period=period,
@@ -383,7 +440,7 @@ class Strategy:
             id_array = np.arange(0, len(group_daily))
             figure_name = 'new_monthly_high.png'
             ax = group_daily.plot.bar()
-            ax.set_ylabel('percentage, %')
+            ax.set_ylabel('%')
             ax.hlines(0, id_array[0], id_array[-1], linestyles='dashed', alpha=0.3)
             fig = ax.get_figure()
             plt.tight_layout()
@@ -395,6 +452,7 @@ class Strategy:
             msg_ru = '{} Новый месячный максимум: {}%'.format(new_high_emoji, monthly_return)
             msg_es = '{} Nuevo máximo mensual: {}%'.format(new_high_emoji, monthly_return)
             msg_tr = '{} Yeni aylık en yüksek: %{}'.format(new_high_emoji, monthly_return)
+            msg_de = '{} Neues Monatshoch: {}%'.format(new_high_emoji, monthly_return)
 
             # Send messages to channels
             for dic in d:
@@ -406,8 +464,9 @@ class Strategy:
                     send_post_to_telegram('Message', dic['channel_id'], msg_es)
                 elif dic['lang'] == 'tr':
                     send_post_to_telegram('Message', dic['channel_id'], msg_tr)
-                elif dic['lang'] == 'maxi':
-                    send_post_to_telegram('Message', dic['channel_id'], msg_ru)
+                elif dic['lang'] == 'de':
+                    send_post_to_telegram('Message', dic['channel_id'], msg_de)
+
                 send_post_to_telegram('Photo', dic['channel_id'], figure_name)
                 logger.info('Message posted in {}'.format(dic['channel_name']))
 
