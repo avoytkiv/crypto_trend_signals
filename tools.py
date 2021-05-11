@@ -45,7 +45,7 @@ def send_post_to_telegram(type, channel_id, message):
     query = {
         'chat_id': channel_id
     }
-    get_final_url = lambda: '{}{}/send{}?{}&parse_mode=Markdown'.format(url, token, type, urlencode(query))
+    get_final_url = lambda: '{}{}/send{}?{}&parse_mode=Markdown&disable_web_page_preview=True'.format(url, token, type, urlencode(query))
     if type == 'Message':
         query['text'] = message
         return requests.post(get_final_url())
@@ -102,7 +102,7 @@ def visualize_candlestick(df, symbol, period, time, trades):
     # Lables
     plt.xlabel('Date')
     plt.ylabel('Price')
-    plt.title('{} {} chart'.format(symbol, period))
+    plt.title('15 min')
     plt.legend()
     # Save figure
     figure_name = '{}-{}-{}.png'.format(symbol, period, time)
