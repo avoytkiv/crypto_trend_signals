@@ -102,7 +102,7 @@ def visualize_candlestick(df, symbol, period, time, trades):
     # Lables
     plt.xlabel('Date')
     plt.ylabel('Price')
-    plt.title('15 min')
+    plt.title('{} 15 min'.format(symbol))
     plt.legend()
     # Save figure
     figure_name = '{}-{}-{}.png'.format(symbol, period, time)

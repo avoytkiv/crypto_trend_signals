@@ -274,18 +274,30 @@ class Strategy:
                                 send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
                             elif dic['lang'] == 'de':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_de_stormgain)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=coin, period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
                         elif dic['source'] == 'bvi':
                             if dic['lang'] == 'ru':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_ru_bvi)
                             elif dic['lang'] == 'eng':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en_bvi)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=libertex_coins[coin], period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
                         elif dic['source'] == 'cysec':
                             send_post_to_telegram('Message', dic['channel_id'], msg_en_cysec)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=libertex_coins[coin],
+                                                                        period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
 
-                        send_post_to_telegram('Photo', dic['channel_id'],
-                                              visualize_candlestick(df=df, symbol=coin, period=period,
-                                                                    time=df.index[-1],
-                                                                    trades=self.__db.fetch_last_trades(coin)))
                         logger.info('Message posted in {}'.format(dic['channel_name']))
                 # Close signal
                 else:
@@ -321,18 +333,32 @@ class Strategy:
                                 send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
                             elif dic['lang'] == 'de':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_de_stormgain)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=coin, period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
                         elif dic['source'] == 'bvi':
                             if dic['lang'] == 'ru':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_ru_bvi)
                             elif dic['lang'] == 'eng':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en_bvi)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=libertex_coins[coin],
+                                                                        period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
                         elif dic['source'] == 'cysec':
                             send_post_to_telegram('Message', dic['channel_id'], msg_en_cysec)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=libertex_coins[coin],
+                                                                        period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
 
-                        send_post_to_telegram('Photo', dic['channel_id'],
-                                              visualize_candlestick(df=df, symbol=coin, period=period,
-                                                                    time=df.index[-1],
-                                                                    trades=self.__db.fetch_last_trades(coin)))
+
                         logger.info('Message posted in {}'.format(dic['channel_name']))
             else:
                 logger.info('{}, {}, chg: {}, prob: {}, range: {}'.format(coin,
@@ -380,18 +406,31 @@ class Strategy:
                                 send_post_to_telegram('Message', dic['channel_id'], msg_tr_stormgain)
                             elif dic['lang'] == 'de':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_de_stormgain)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=coin, period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
                         elif dic['source'] == 'bvi':
                             if dic['lang'] == 'ru':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_ru_bvi)
                             elif dic['lang'] == 'eng':
                                 send_post_to_telegram('Message', dic['channel_id'], msg_en_bvi)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=libertex_coins[coin],
+                                                                        period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
                         elif dic['source'] == 'cysec':
                             send_post_to_telegram('Message', dic['channel_id'], msg_en_cysec)
+                            # Chart
+                            send_post_to_telegram('Photo', dic['channel_id'],
+                                                  visualize_candlestick(df=df, symbol=libertex_coins[coin],
+                                                                        period=period,
+                                                                        time=df.index[-1],
+                                                                        trades=self.__db.fetch_last_trades(coin)))
 
-                        send_post_to_telegram('Photo', dic['channel_id'],
-                                              visualize_candlestick(df=df, symbol=coin, period=period,
-                                                                    time=df.index[-1],
-                                                                    trades=self.__db.fetch_last_trades(coin)))
                         logger.info('Message posted in {}'.format(dic['channel_name']))
 
                 continue
