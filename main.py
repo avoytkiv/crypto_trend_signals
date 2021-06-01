@@ -52,8 +52,9 @@ d = [{'channel_name': 'Stormgain', 'channel_id': '-1001442509377', 'lang': 'eng'
      {'channel_name': 'Crypto3.0 Storm Signals DE', 'channel_id': '-1001131605190', 'lang': 'de', 'source': 'storm'}]
 
 icid_link = lambda coin, lang: 'https://app.stormgain.com/deeplink.html?mobile=instrument/instruments/{0}&desktop=%23modal_newInvest_{0}&icid=academy_sgcrypto_{1}_telegram'.format(coin, lang)
-cysec_link = lambda coin: 'https://app.libertex.com/?icid=Research_Crypto3#modal_newInvest_{}'.format(coin)
-bvi_link = lambda coin: 'https://libertex.fxclub.org/?icid=Research_Crypto3#modal_newInvest_{}'.format(coin)
+cysec_link = lambda coin: 'https://app.libertex.com/deeplink.html?icid=Research_Crypto3&mobile=new-investment/{0}&desktop=%23modal_newInvest_{0}&accounttype=real'.format(coin)
+bvi_link = lambda coin: 'https://libertex.fxclub.org/deeplink.html?icid=Research_Crypto3&mobile=new-investment/{0}&desktop=%23modal_newInvest_{0}&accounttype=real'.format(coin)
+bvi_mirror_link = lambda coin: 'https://libertex-fxclub.gofxclub.org/deeplink.html?icid=Research_Crypto3&mobile=new-investment/{0}&desktop=%23modal_newInvest_{0}&accounttype=real'.format(coin)
 
 open_emoji = emojize(":rotating_light:", use_aliases=True)
 close_emoji = emojize(":bell:", use_aliases=True)
@@ -257,8 +258,8 @@ class Strategy:
                         open_emoji, row['signal'], coin, row['close'], stop_loss_price, icid_link(coin, 'de'))
                     msg_en_bvi = '{} *{}* #{} at {}\nStop loss: {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
                         open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, bvi_link(libertex_coins[coin]))
-                    msg_ru_bvi = '{} *{}* #{} по {}\nСтоп лосс: {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал на инструмент]({})'.format(
-                        open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, bvi_link(libertex_coins[coin]))
+                    msg_ru_bvi = '{} *{}* #{} по {}\nСтоп лосс: {}\nВ эту позицию мы вложили только 3% нашего капитала.\n[Перейти в терминал на инструмент]({})\nТакже для перехода в терминал можете использовать [запасную ссылку]({})'.format(
+                        open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, bvi_link(libertex_coins[coin]), bvi_mirror_link(libertex_coins[coin]))
                     msg_en_cysec = '{} *{}* #{} at {}\nStop loss: {}\nThis position is only 3% of our capital.\n[Please, press the link to open terminal]({})'.format(
                         open_emoji, row['signal'], libertex_coins[coin], row['close'], stop_loss_price, cysec_link(libertex_coins[coin]))
                     # Send messages to channels
@@ -315,8 +316,8 @@ class Strategy:
                         close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'de'))
                     msg_en_bvi = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
                         close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
-                    msg_ru_bvi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал на инструмент]({})'.format(
-                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
+                    msg_ru_bvi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал на инструмент]({})\nТакже для перехода в терминал можете использовать [запасную ссылку]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]), bvi_mirror_link(libertex_coins[coin]))
                     msg_en_cysec = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
                         close_emoji, libertex_coins[coin], row['close'], pct_chg, cysec_link(libertex_coins[coin]))
 
@@ -389,8 +390,8 @@ class Strategy:
                         close_emoji, coin, row['close'], pct_chg, icid_link(coin, 'de'))
                     msg_en_bvi = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
                         close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
-                    msg_ru_bvi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал на инструмент]({})'.format(
-                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]))
+                    msg_ru_bvi = '{} Закрыть #{} по {}\nПроцент изменения от точки входа: {}%\nПереходим к следующему хорошему трейду!\n[Перейти в терминал на инструмент]({})\nТакже для перехода в терминал можете использовать [запасную ссылку]({})'.format(
+                        close_emoji, libertex_coins[coin], row['close'], pct_chg, bvi_link(libertex_coins[coin]), bvi_mirror_link(libertex_coins[coin]))
                     msg_en_cysec = '{} Cover #{} at {}\nPercent change from entry price is: {}%\nLets move on to next Good trade!\n[Please, press the link to open terminal]({})'.format(
                         close_emoji, libertex_coins[coin], row['close'], pct_chg, cysec_link(libertex_coins[coin]))
                     # Send messages to channels
